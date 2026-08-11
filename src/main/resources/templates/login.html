@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(title='Login - SS Supermarket')}"></head>
+<body>
+
+<div th:replace="~{fragments/layout :: navbar}"></div>
+
+<section class="section">
+    <div class="container">
+        <form class="form-card" th:action="@{/login}" method="post">
+            <h2>Welcome back</h2>
+            <p class="subtitle">Log in to continue shopping at SS Supermarket.</p>
+
+            <div th:if="${param.error}" class="alert alert-error">Invalid email or password. Please try again.</div>
+            <div th:if="${param.logout}" class="alert alert-success">You have been logged out successfully.</div>
+
+            <div class="form-group">
+                <label for="username">Email</label>
+                <input type="email" id="username" name="username" placeholder="you@example.com" required autofocus>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Your password" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block">Login</button>
+
+            <p class="text-center mt-2 text-muted">Don't have an account?
+                <a th:href="@{/register}">Register here</a>
+            </p>
+        </form>
+    </div>
+</section>
+
+<div th:replace="~{fragments/layout :: footer}"></div>
+<script th:src="@{/js/main.js}"></script>
+
+</body>
+</html>

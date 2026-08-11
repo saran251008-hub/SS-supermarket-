@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(title='Register - SS Supermarket')}"></head>
+<body>
+
+<div th:replace="~{fragments/layout :: navbar}"></div>
+
+<section class="section">
+    <div class="container">
+        <form class="form-card" th:action="@{/register}" th:object="${registerRequest}" method="post">
+            <h2>Create your account</h2>
+            <p class="subtitle">Join SS Supermarket and start shopping today.</p>
+
+            <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}">Error</div>
+
+            <div class="form-group">
+                <label for="name">Full Name</label>
+                <input type="text" id="name" th:field="*{name}" placeholder="Your full name" required>
+                <div class="field-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">Name error</div>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" th:field="*{email}" placeholder="you@example.com" required>
+                <div class="field-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">Email error</div>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" th:field="*{password}" placeholder="Minimum 8 characters" required>
+                <div class="field-error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}">Password error</div>
+            </div>
+
+            <div class="form-group">
+                <label for="confirmPassword">Confirm Password</label>
+                <input type="password" id="confirmPassword" th:field="*{confirmPassword}" placeholder="Re-enter your password" required>
+                <div class="field-error" th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}">Confirm password error</div>
+            </div>
+
+            <div class="form-group">
+                <label for="role">Register as</label>
+                <select id="role" th:field="*{role}" required>
+                    <option value="">Select a role</option>
+                    <option value="BUYER">Buyer</option>
+                    <option value="SELLER">Seller</option>
+                </select>
+                <div class="field-error" th:if="${#fields.hasErrors('role')}" th:errors="*{role}">Role error</div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block">Create Account</button>
+
+            <p class="text-center mt-2 text-muted">Already have an account?
+                <a th:href="@{/login}">Login here</a>
+            </p>
+        </form>
+    </div>
+</section>
+
+<div th:replace="~{fragments/layout :: footer}"></div>
+<script th:src="@{/js/main.js}"></script>
+
+</body>
+</html>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(title='My Orders - SS Supermarket')}"></head>
+<body>
+
+<div th:replace="~{fragments/layout :: navbar}"></div>
+<div th:replace="~{fragments/layout :: messages}"></div>
+
+<section class="section">
+    <div class="container">
+        <div class="section-head">
+            <h2>My Orders</h2>
+            <a th:href="@{/products}" class="link">Continue shopping &rarr;</a>
+        </div>
+
+        <div th:if="${!orders.isEmpty()}" class="table-wrap">
+            <table>
+                <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Date</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="order : ${orders}">
+                    <td>#<span th:text="${order.id}">1</span></td>
+                    <td th:text="${#temporals.format(order.createdAt, 'dd MMM yyyy, hh:mm a')}">11 Aug 2026</td>
+                    <td>&#8377;<span th:text="${#numbers.formatDecimal(order.totalAmount, 1, 'COMMA', 2, 'POINT')}">45000.00</span></td>
+                    <td><span class="tag" th:text="${order.status}">CONFIRMED</span></td>
+                    <td>
+                        <a th:href="@{/orders/{id}(id=${order.id})}" class="btn btn-outline btn-sm">View Details</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div th:if="${orders.isEmpty()}" class="empty">
+            <div class="empty-icon">&#128230;</div>
+            <h3>No orders yet</h3>
+            <p>When you place an order it will appear here.</p>
+            <a th:href="@{/products}" class="btn btn-primary">Start Shopping</a>
+        </div>
+    </div>
+</section>
+
+<div th:replace="~{fragments/layout :: footer}"></div>
+<script th:src="@{/js/main.js}"></script>
+
+</body>
+</html>

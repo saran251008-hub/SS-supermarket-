@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title}">SS Supermarket</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+
+<nav th:fragment="navbar" class="navbar">
+    <div class="navbar-inner container">
+        <a th:href="@{/}" class="brand">
+            <img th:src="@{/images/logo.svg}" alt="SS Supermarket logo">
+            <span>SS <em>Supermarket</em></span>
+        </a>
+        <button class="nav-toggle" onclick="toggleNav()" aria-label="Toggle navigation">&#9776;</button>
+        <ul class="nav-links" id="navLinks">
+            <li><a th:href="@{/}">Home</a></li>
+            <li><a th:href="@{/products}">Products</a></li>
+            <li sec:authorize="!isAuthenticated()"><a th:href="@{/login}">Login</a></li>
+            <li sec:authorize="!isAuthenticated()"><a th:href="@{/register}" class="btn btn-primary btn-sm">Register</a></li>
+            <li sec:authorize="isAuthenticated()">
+                <a th:href="@{/cart}">Cart
+                    <span th:if="${cartCount != null and cartCount > 0}" class="badge" th:text="${cartCount}">0</span>
+                </a>
+            </li>
+            <li sec:authorize="hasRole('BUYER')"><a th:href="@{/orders}">Orders</a></li>
+            <li sec:authorize="hasRole('SELLER')"><a th:href="@{/seller}">Seller Dashboard</a></li>
+            <li sec:authorize="hasRole('ADMIN')"><a th:href="@{/admin}">Admin Dashboard</a></li>
+            <li sec:authorize="isAuthenticated()">
+                <span class="nav-user" th:text="${currentUser != null} ? 'Hi, ' + ${currentUser.name} : 'Hi'">Hi</span>
+            </li>
+            <li sec:authorize="isAuthenticated()">
+                <form th:action="@{/logout}" method="post" class="inline-form">
+                    <button type="submit" class="btn btn-outline btn-sm">Logout</button>
+                </form>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<main th:fragment="content">
+
+</main>
+
+<footer th:fragment="footer" class="footer">
+    <div class="container footer-grid">
+        <div>
+            <h4>SS Supermarket</h4>
+            <p>Your one-stop online store for electronics and everyday essentials.</p>
+        </div>
+        <div>
+            <h4>Shop</h4>
+            <a th:href="@{/products}">All Products</a>
+            <a th:href="@{/products(category='Electronics')}">Electronics</a>
+            <a th:href="@{/products(category='Accessories')}">Accessories</a>
+            <a th:href="@{/products(category='Wearables')}">Wearables</a>
+        </div>
+        <div>
+            <h4>Account</h4>
+            <a sec:authorize="!isAuthenticated()" th:href="@{/login}">Login</a>
+            <a sec:authorize="!isAuthenticated()" th:href="@{/register}">Register</a>
+            <a sec:authorize="isAuthenticated()" th:href="@{/orders}">My Orders</a>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        &copy; <span th:text="${#temporals.format(#temporals.createNow(), 'yyyy')}">2026</span> SS Supermarket. All rights reserved.
+    </div>
+</footer>
+
+<div th:fragment="messages" class="container" th:style="${'margin-top:18px'}">
+    <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}">Success</div>
+    <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}">Error</div>
+</div>
+
+</body>
+</html>

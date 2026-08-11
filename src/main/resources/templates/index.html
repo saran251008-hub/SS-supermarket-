@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(title='SS Supermarket - Fresh Deals, Everyday')}"></head>
+<body>
+
+<div th:replace="~{fragments/layout :: navbar}"></div>
+
+<section class="hero">
+    <div class="container">
+        <h1>Fresh Deals. <span>Everyday Essentials.</span></h1>
+        <p>Shop laptops, smartphones, accessories and wearables at honest prices. Simple checkout, fast delivery.</p>
+        <div class="hero-actions">
+            <a th:href="@{/products}" class="btn btn-accent">Shop Now</a>
+            <a th:href="@{/products(category='Electronics')}" class="btn btn-dark">Browse Categories</a>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="section-head">
+            <h2>Featured Products</h2>
+            <a th:href="@{/products}" class="link">View all products &rarr;</a>
+        </div>
+
+        <div class="grid" th:if="${!featuredProducts.isEmpty()}">
+            <div class="card" th:each="product : ${featuredProducts}">
+                <div class="card-media">
+                    <img th:src="@{${product.imageUrl != null ? product.imageUrl : '/images/products/default.svg'}}"
+                         th:alt="${product.name}">
+                </div>
+                <div class="card-body">
+                    <span class="tag" th:text="${product.category}">Electronics</span>
+                    <h3 th:text="${product.name}">Laptop</h3>
+                    <div class="card-meta">
+                        <span class="price">&#8377;<span th:text="${#numbers.formatDecimal(product.price, 1, 'COMMA', 2, 'POINT')}">45000.00</span></span>
+                        <span th:if="${product.stock > 0}" class="stock-info" th:text="'In stock (' + ${product.stock} + ')'">In stock</span>
+                        <span th:if="${product.stock <= 0}" class="stock-info out">Out of stock</span>
+                    </div>
+                    <div class="card-actions">
+                        <a th:href="@{/products/{id}(id=${product.id})}" class="btn btn-outline btn-sm">View Details</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div th:if="${featuredProducts.isEmpty()}" class="empty">
+            <div class="empty-icon">&#128722;</div>
+            <h3>No products yet</h3>
+            <p>Check back soon - we are stocking the shelves.</p>
+        </div>
+    </div>
+</section>
+
+<section class="section" style="padding-top:0">
+    <div class="container">
+        <div class="section-head">
+            <h2>Shop by Category</h2>
+        </div>
+        <div class="cat-grid">
+            <a th:href="@{/products(category='Electronics')}" class="cat-card">
+                <div class="cat-icon">&#128187;</div>
+                <h3>Electronics</h3>
+                <p>Laptops, smartphones and more</p>
+            </a>
+            <a th:href="@{/products(category='Accessories')}" class="cat-card">
+                <div class="cat-icon">&#127911;</div>
+                <h3>Accessories</h3>
+                <p>Headphones, keyboards and add-ons</p>
+            </a>
+            <a th:href="@{/products(category='Wearables')}" class="cat-card">
+                <div class="cat-icon">&#9202;</div>
+                <h3>Wearables</h3>
+                <p>Smart watches and fitness gear</p>
+            </a>
+        </div>
+    </div>
+</section>
+
+<div th:replace="~{fragments/layout :: footer}"></div>
+<script th:src="@{/js/main.js}"></script>
+
+</body>
+</html>

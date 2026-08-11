@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(title='Products - SS Supermarket')}"></head>
+<body>
+
+<div th:replace="~{fragments/layout :: navbar}"></div>
+<div th:replace="~{fragments/layout :: messages}"></div>
+
+<section class="section">
+    <div class="container">
+        <div class="section-head">
+            <h2>All Products</h2>
+        </div>
+
+        <form class="form-row mb-2" th:action="@{/products}" method="get">
+            <div class="form-group" style="flex:2">
+                <label for="search">Search products</label>
+                <input type="text" id="search" name="search" th:value="${search}"
+                       placeholder="Search by product name, e.g. laptop">
+            </div>
+            <div class="form-group" style="flex:1">
+                <label for="category">Category</label>
+                <select id="category" name="category">
+                    <option value="" th:selected="${selectedCategory == ''}">All categories</option>
+                    <option th:each="cat : ${categories}" th:value="${cat}"
+                            th:selected="${selectedCategory == cat}" th:text="${cat}">Electronics</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">Apply Filters</button>
+            </div>
+        </form>
+
+        <p th:if="${!products.isEmpty()}" class="text-muted mb-2"
+           th:text="${#lists.size(products) + ' product(s) found'}">Products found</p>
+
+        <div class="grid">
+            <div class="card" th:each="product : ${products}">
+                <a th:href="@{/products/{id}(id=${product.id})}">
+                    <div class="card-media">
+                        <img th:src="@{${product.imageUrl != null ? product.imageUrl : '/images/products/default.svg'}}"
+                             th:alt="${product.name}">
+                    </div>
+                </a>
+                <div class="card-body">
+                    <span class="tag" th:text="${product.category}">Electronics</span>
+                    <h3>
+                        <a th:href="@{/products/{id}(id=${product.id})}" th:text="${product.name}">Laptop</a>
+                    </h3>
+                    <div class="card-meta">
+                        <span class="price">&#8377;<span th:text="${#numbers.formatDecimal(product.price, 1, 'COMMA', 2, 'POINT')}">45000.00</span></span>
+                        <span th:if="${product.stock > 0}" class="stock-info"
+                              th:text="${product.stock <= 5 ? 'Only ' + product.stock + ' left' : 'In stock'}">In stock</span>
+                        <span th:if="${product.stock <= 0}" class="stock-info out">Out of stock</span>
+                    </div>
+                    <div class="card-actions">
+                        <a th:href="@{/products/{id}(id=${product.id})}" class="btn btn-outline btn-sm">View Details</a>
+                        <form th:if="${product.stock > 0}" th:action="@{/cart/add/{id}(id=${product.id})}" method="post">
+                            <button type="submit" class="btn btn-primary btn-sm">Add to Cart</button>
+                        </form>
+                        <button th:if="${product.stock <= 0}" type="button" class="btn btn-primary btn-sm" disabled>Out of Stock</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div th:if="${products.isEmpty()}" class="empty mt-2">
+            <div class="empty-icon">&#128269;</div>
+            <h3>No products found</h3>
+            <p>Try a different search term or category.</p>
+            <a th:href="@{/products}" class="btn btn-primary">Clear Filters</a>
+        </div>
+    </div>
+</section>
+
+<div th:replace="~{fragments/layout :: footer}"></div>
+<script th:src="@{/js/main.js}"></script>
+
+</body>
+</html>

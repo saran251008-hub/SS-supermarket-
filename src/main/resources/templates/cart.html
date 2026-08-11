@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(title='Shopping Cart - SS Supermarket')}"></head>
+<body>
+
+<div th:replace="~{fragments/layout :: navbar}"></div>
+<div th:replace="~{fragments/layout :: messages}"></div>
+
+<section class="section">
+    <div class="container">
+        <div class="section-head">
+            <h2>Your Cart</h2>
+            <a th:href="@{/products}" class="link">Continue shopping &rarr;</a>
+        </div>
+
+        <div th:if="${!cart.isEmpty()}" class="table-wrap">
+            <table>
+                <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Subtotal</th>
+                    <th>Remove</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="item : ${cart.items}">
+                    <td>
+                        <div style="display:flex; align-items:center; gap:12px">
+                            <img th:src="@{${item.imageUrl != null ? item.imageUrl : '/images/products/default.svg'}}"
+                                 th:alt="${item.productName}" style="width:56px; height:44px; object-fit:contain">
+                            <div>
+                                <a th:href="@{/products/{id}(id=${item.productId})}" th:text="${item.productName}">Laptop</a>
+                                <div class="text-muted" style="font-size:0.8rem" th:text="'Max available: ' + ${item.stock}">Max</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>&#8377;<span th:text="${#numbers.formatDecimal(item.price, 1, 'COMMA', 2, 'POINT')}">45000.00</span></td>
+                    <td>
+                        <form class="qty-form" th:action="@{/cart/update/{id}(id=${item.id})}" method="post">
+                            <input type="number" name="quantity" th:value="${item.quantity}"
+                                   min="1" th:max="${item.stock}" required>
+                            <button type="submit" class="btn btn-outline btn-sm">Update</button>
+                        </form>
+                    </td>
+                    <td>&#8377;<span th:text="${#numbers.formatDecimal(item.subtotal, 1, 'COMMA', 2, 'POINT')}">45000.00</span></td>
+                    <td>
+                        <form th:action="@{/cart/remove/{id}(id=${item.id})}" method="post">
+                            <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+                <tfoot>
+                <tr class="total-row">
+                    <td colspan="3">Total items: <span th:text="${cart.totalItems}">2</span></td>
+                    <td colspan="2">Total: &#8377;<span th:text="${#numbers.formatDecimal(cart.totalAmount, 1, 'COMMA', 2, 'POINT')}">50000.00</span></td>
+                </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <div th:if="${!cart.isEmpty()}" class="flex-between mt-2">
+            <a th:href="@{/products}" class="btn btn-outline">Continue Shopping</a>
+            <a th:href="@{/checkout}" class="btn btn-primary">Proceed to Checkout &rarr;</a>
+        </div>
+
+        <div th:if="${cart.isEmpty()}" class="empty">
+            <div class="empty-icon">&#128722;</div>
+            <h3>Your cart is empty</h3>
+            <p>Add some products and they will show up here.</p>
+            <a th:href="@{/products}" class="btn btn-primary">Start Shopping</a>
+        </div>
+    </div>
+</section>
+
+<div th:replace="~{fragments/layout :: footer}"></div>
+<script th:src="@{/js/main.js}"></script>
+
+</body>
+</html>

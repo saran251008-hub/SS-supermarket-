@@ -1,0 +1,44 @@
+# Build output
+target/
+build/
+*.class
+*.jar
+*.war
+
+# Maven wrapper
+.mvn/wrapper/maven-wrapper.jar
+
+# IDE files
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.settings/
+.project
+.classpath
+.factorypath
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+logs/
+
+# Local environment / secrets
+.env
+.env.*
+*.local.properties
+application-local.properties
+application-secret.properties
+
+# Database dumps / backups
+*.sql.bak
+*.sql.gz
+
+# Temp files
+*.tmp
+*.swp

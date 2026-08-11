@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(title='Order Details - SS Supermarket')}"></head>
+<body>
+
+<div th:replace="~{fragments/layout :: navbar}"></div>
+<div th:replace="~{fragments/layout :: messages}"></div>
+
+<section class="section">
+    <div class="container">
+        <div class="section-head">
+            <h2>Order #<span th:text="${order.id}">1</span></h2>
+            <a th:href="@{/orders}" class="link">&larr; Back to orders</a>
+        </div>
+
+        <div class="flex-between mb-2">
+            <div>
+                <p class="text-muted">Placed on
+                    <span th:text="${#temporals.format(order.createdAt, 'dd MMM yyyy, hh:mm a')}">11 Aug 2026</span>
+                </p>
+                <p>Status: <span class="tag" th:text="${order.status}">CONFIRMED</span></p>
+            </div>
+            <p class="price">Total: &#8377;<span th:text="${#numbers.formatDecimal(order.totalAmount, 1, 'COMMA', 2, 'POINT')}">45000.00</span></p>
+        </div>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Subtotal</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="item : ${order.items}">
+                    <td>
+                        <div style="display:flex; align-items:center; gap:12px">
+                            <img th:src="@{${item.imageUrl != null ? item.imageUrl : '/images/products/default.svg'}}"
+                                 th:alt="${item.productName}" style="width:56px; height:44px; object-fit:contain">
+                            <a th:href="@{/products/{id}(id=${item.productId})}" th:text="${item.productName}">Laptop</a>
+                        </div>
+                    </td>
+                    <td th:text="${item.quantity}">1</td>
+                    <td>&#8377;<span th:text="${#numbers.formatDecimal(item.price, 1, 'COMMA', 2, 'POINT')}">45000.00</span></td>
+                    <td>&#8377;<span th:text="${#numbers.formatDecimal(item.subtotal, 1, 'COMMA', 2, 'POINT')}">45000.00</span></td>
+                </tr>
+                </tbody>
+                <tfoot>
+                <tr class="total-row">
+                    <td colspan="3">Order total</td>
+                    <td>&#8377;<span th:text="${#numbers.formatDecimal(order.totalAmount, 1, 'COMMA', 2, 'POINT')}">45000.00</span></td>
+                </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <div class="flex-between mt-2">
+            <a th:href="@{/orders}" class="btn btn-outline">Back to Orders</a>
+            <a th:href="@{/products}" class="btn btn-primary">Continue Shopping</a>
+        </div>
+    </div>
+</section>
+
+<div th:replace="~{fragments/layout :: footer}"></div>
+<script th:src="@{/js/main.js}"></script>
+
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(title='Seller Dashboard - SS Supermarket')}"></head>
+<body>
+
+<div th:replace="~{fragments/layout :: navbar}"></div>
+<div th:replace="~{fragments/layout :: messages}"></div>
+
+<section class="section">
+    <div class="container">
+        <div class="section-head">
+            <h2>Seller Dashboard</h2>
+            <a th:href="@{/products}" class="link">View storefront &rarr;</a>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Welcome</div>
+                <div class="stat-value" th:text="${sellerName}">Seller</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">My Products</div>
+                <div class="stat-value" th:text="${productCount}">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Member Since</div>
+                <div class="stat-value" style="font-size:1.1rem"
+                     th:text="${#temporals.format(memberSince, 'dd MMM yyyy')}">2026</div>
+            </div>
+        </div>
+
+        <div class="placeholder-box">
+            <h3>Product Management - Coming in Phase 2</h3>
+            <p>In the next phase you will be able to add, edit and remove your own products, and view orders received for them.</p>
+        </div>
+    </div>
+</section>
+
+<div th:replace="~{fragments/layout :: footer}"></div>
+<script th:src="@{/js/main.js}"></script>
+
+</body>
+</html>

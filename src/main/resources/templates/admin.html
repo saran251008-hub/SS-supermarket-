@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(title='Admin Dashboard - SS Supermarket')}"></head>
+<body>
+
+<div th:replace="~{fragments/layout :: navbar}"></div>
+<div th:replace="~{fragments/layout :: messages}"></div>
+
+<section class="section">
+    <div class="container">
+        <div class="section-head">
+            <h2>Admin Dashboard</h2>
+            <a th:href="@{/products}" class="link">View storefront &rarr;</a>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Total Users</div>
+                <div class="stat-value" th:text="${totalUsers}">1</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total Products</div>
+                <div class="stat-value" th:text="${totalProducts}">5</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total Orders</div>
+                <div class="stat-value" th:text="${totalOrders}">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total Revenue</div>
+                <div class="stat-value">&#8377;<span th:text="${#numbers.formatDecimal(totalRevenue, 1, 'COMMA', 2, 'POINT')}">0.00</span></div>
+            </div>
+        </div>
+
+        <div class="placeholder-box">
+            <h3>User &amp; Order Management - Coming in Phase 2</h3>
+            <p>In the next phase you will be able to view and manage users, orders and products from this dashboard.</p>
+        </div>
+    </div>
+</section>
+
+<div th:replace="~{fragments/layout :: footer}"></div>
+<script th:src="@{/js/main.js}"></script>
+
+</body>
+</html>
