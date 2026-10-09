@@ -31,15 +31,14 @@ public class ProductResponse {
         response.setBrand(product.getBrand());
         response.setPrice(product.getPrice());
         if (product.getCategoryEntity() != null) {
-             String actualCategoryName = product.getCategoryEntity().getName();
-
-        response.setCategory(actualCategoryName);
-        response.setCategoryId(product.getCategoryEntity().getId());
-        response.setCategoryName(actualCategoryName);
-              } 
-         else {
-    response.setCategory(product.getCategory());
-               }
+            String actualCategoryName = product.getCategoryEntity().getName();
+            response.setCategory(product.getCategory() != null && !product.getCategory().isBlank()
+                    ? product.getCategory() : actualCategoryName);
+            response.setCategoryId(product.getCategoryEntity().getId());
+            response.setCategoryName(actualCategoryName);
+        } else {
+            response.setCategory(product.getCategory());
+        }
         response.setImageUrl(product.getImageUrl());
         response.setStock(product.getStock());
         response.setSellerId(product.getSellerId());
