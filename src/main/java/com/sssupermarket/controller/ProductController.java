@@ -30,7 +30,7 @@ public class ProductController {
                            @RequestParam(defaultValue = "false") boolean includeChildren,
                        Model model) {
                 model.addAttribute("products", categoryId == null ? productService.listProducts(search, category)
-                    : productService.searchProducts(search, categoryId, includeChildren, 0, 20).getContent());
+                    : productService.searchProducts(search, categoryId, includeChildren, 0, 100).getContent());
                 model.addAttribute("categoryTree", categoryService.tree());
                 model.addAttribute("categoryOptions", categoryService.flatTree());
                 model.addAttribute("breadcrumb", categoryId == null ? List.of() : categoryService.breadcrumb(categoryId));

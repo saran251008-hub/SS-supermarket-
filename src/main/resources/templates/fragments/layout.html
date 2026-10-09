@@ -30,6 +30,7 @@
             <li sec:authorize="hasRole('BUYER')"><a th:href="@{/orders}">Orders</a></li>
             <li sec:authorize="hasRole('SELLER')"><a th:href="@{/seller}">Seller Dashboard</a></li>
             <li sec:authorize="hasRole('ADMIN')"><a th:href="@{/admin}">Admin Dashboard</a></li>
+            <li sec:authorize="hasRole('BUYER')"><a th:href="@{/profile}" class="btn btn-outline btn-sm" style="padding:4px 8px; font-size:0.8rem; border-color:var(--primary); color:var(--primary-dark);">Become Seller</a></li>
             <li sec:authorize="isAuthenticated()">
                 <span class="nav-user" th:text="${currentUser != null} ? 'Hi, ' + ${currentUser.name} : 'Hi'">Hi</span>
             </li>

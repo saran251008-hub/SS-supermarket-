@@ -33,8 +33,9 @@ class ProductServiceTest {
     void search_findsProductsByName() {
         List<ProductResponse> results = productService.listProducts("laptop", null);
 
-        assertThat(results).hasSize(1);
-        assertThat(results.get(0).getName()).isEqualTo("Laptop");
+        assertThat(results).isNotEmpty();
+        assertThat(results).extracting(ProductResponse::getName)
+                .contains("Laptop");
     }
 
     @Test

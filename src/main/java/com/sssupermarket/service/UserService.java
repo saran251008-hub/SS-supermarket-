@@ -10,6 +10,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 public class UserService {
 
@@ -56,5 +58,29 @@ public class UserService {
     @Transactional(readOnly = true)
     public long countUsers() {
         return userRepository.count();
+    }
+
+    @Transactional(readOnly = true)
+    public List<User> listAllUsers() {
+        return userRepository.findAllByOrderByCreatedAtDesc();
+    }
+
+    @Transactional
+    public User updateUserRole(Long userId, Role newRole) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + userId));
+        user.setRole(newRole);
+        return userRepository.save(user);
+    }
+
+    @Transactional
+    public User upgradeToSeller(Long userId, String phone) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + userId));
+        user.setRole(Role.SELLER);
+        if (phone != null && !phone.isBlank()) {
+            user.setPhone(phone.trim());
+        }
+        return userRepository.save(user);
     }
 }

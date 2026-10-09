@@ -1,13 +1,19 @@
 package com.sssupermarket.service;
 
+import com.sssupermarket.dto.ProductFormRequest;
 import com.sssupermarket.dto.ProductResponse;
+import com.sssupermarket.entity.Category;
 import com.sssupermarket.entity.Product;
 import com.sssupermarket.exception.ProductNotFoundException;
+import com.sssupermarket.repository.CartItemRepository;
+import com.sssupermarket.repository.CategoryRepository;
+import com.sssupermarket.repository.OrderItemRepository;
 import com.sssupermarket.repository.ProductRepository;
 import com.sssupermarket.repository.UserRepository;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,13 +24,22 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
+    private final CategoryRepository categoryRepository;
     private final CategoryService categoryService;
+    private final CartItemRepository cartItemRepository;
+    private final OrderItemRepository orderItemRepository;
 
     public ProductService(ProductRepository productRepository, UserRepository userRepository,
-                          CategoryService categoryService) {
+                          CategoryRepository categoryRepository,
+                          CategoryService categoryService,
+                          CartItemRepository cartItemRepository,
+                          OrderItemRepository orderItemRepository) {
         this.productRepository = productRepository;
         this.userRepository = userRepository;
+        this.categoryRepository = categoryRepository;
         this.categoryService = categoryService;
+        this.cartItemRepository = cartItemRepository;
+        this.orderItemRepository = orderItemRepository;
     }
 
     @Transactional(readOnly = true)
@@ -73,6 +88,109 @@ public class ProductService {
             PageRequest.of(Math.max(page, 0), Math.min(Math.max(size, 1), 100),
                 Sort.by(Sort.Direction.DESC, "createdAt"))).map(this::toResponse);
         }
+
+    @Transactional
+    public ProductResponse createProduct(ProductFormRequest request, Long sellerId) {
+        Product product = new Product();
+        product.setName(request.getName().trim());
+        product.setDescription(request.getDescription() != null ? request.getDescription().trim() : null);
+        product.setPrice(request.getPrice());
+        product.setStock(request.getStock());
+        product.setSellerId(sellerId);
+        product.setBrand(request.getBrand() != null && !request.getBrand().isBlank() ? request.getBrand().trim() : "SS Supermarket");
+
+        String imageUrl = request.getImageUrl();
+        if (imageUrl == null || imageUrl.isBlank()) {
+            imageUrl = "/images/products/default.jpg";
+        }
+        product.setImageUrl(imageUrl.trim());
+
+        Category categoryEntity = null;
+        if (request.getCategoryId() != null) {
+            categoryEntity = categoryRepository.findById(request.getCategoryId()).orElse(null);
+        }
+        if (categoryEntity == null && request.getCategory() != null && !request.getCategory().isBlank()) {
+            categoryEntity = categoryRepository.findByNameIgnoreCase(request.getCategory().trim()).orElse(null);
+        }
+
+        if (categoryEntity != null) {
+            product.setCategoryEntity(categoryEntity);
+            product.setCategory(categoryEntity.getName());
+        } else {
+            product.setCategory(request.getCategory() != null && !request.getCategory().isBlank() ? request.getCategory().trim() : "General");
+        }
+
+        Product saved = productRepository.save(product);
+        return toResponse(saved);
+    }
+
+    @Transactional
+    public ProductResponse updateProduct(Long productId, ProductFormRequest request, Long sellerId, boolean isAdmin) {
+        Product product = getProductEntity(productId);
+        if (!isAdmin && (product.getSellerId() == null || !product.getSellerId().equals(sellerId))) {
+            throw new AccessDeniedException("You do not have permission to modify this product.");
+        }
+
+        product.setName(request.getName().trim());
+        product.setDescription(request.getDescription() != null ? request.getDescription().trim() : null);
+        product.setPrice(request.getPrice());
+        product.setStock(request.getStock());
+        if (request.getBrand() != null && !request.getBrand().isBlank()) {
+            product.setBrand(request.getBrand().trim());
+        }
+        if (request.getImageUrl() != null && !request.getImageUrl().isBlank()) {
+            product.setImageUrl(request.getImageUrl().trim());
+        }
+
+        Category categoryEntity = null;
+        if (request.getCategoryId() != null) {
+            categoryEntity = categoryRepository.findById(request.getCategoryId()).orElse(null);
+        }
+        if (categoryEntity == null && request.getCategory() != null && !request.getCategory().isBlank()) {
+            categoryEntity = categoryRepository.findByNameIgnoreCase(request.getCategory().trim()).orElse(null);
+        }
+
+        if (categoryEntity != null) {
+            product.setCategoryEntity(categoryEntity);
+            product.setCategory(categoryEntity.getName());
+        } else if (request.getCategory() != null && !request.getCategory().isBlank()) {
+            product.setCategory(request.getCategory().trim());
+        }
+
+        Product saved = productRepository.save(product);
+        return toResponse(saved);
+    }
+
+    @Transactional
+    public void deleteProduct(Long productId, Long sellerId, boolean isAdmin) {
+        Product product = getProductEntity(productId);
+        if (!isAdmin && (product.getSellerId() == null || !product.getSellerId().equals(sellerId))) {
+            throw new AccessDeniedException("You do not have permission to delete this product.");
+        }
+
+        cartItemRepository.deleteByProductId(productId);
+
+        if (orderItemRepository.existsByProductId(productId)) {
+            product.setStock(0);
+            productRepository.save(product);
+        } else {
+            productRepository.delete(product);
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public List<ProductResponse> getProductsBySeller(Long sellerId) {
+        return productRepository.findBySellerIdOrderByCreatedAtDesc(sellerId).stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ProductResponse> getAllProductsAdmin() {
+        return productRepository.findAllByOrderByCreatedAtDesc().stream()
+                .map(this::toResponse)
+                .toList();
+    }
 
     private ProductResponse toResponse(Product product) {
         ProductResponse response = ProductResponse.fromEntity(product);

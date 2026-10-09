@@ -11,4 +11,5 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
     List<Category> findByParentIdAndActiveTrueOrderByName(Long parentId);
     Optional<Category> findBySlug(String slug);
     boolean existsBySlug(String slug);
+    Optional<Category> findByNameIgnoreCase(String name);
 }

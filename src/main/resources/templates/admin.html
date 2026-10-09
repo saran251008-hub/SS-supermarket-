@@ -8,11 +8,19 @@
 
 <section class="section">
     <div class="container">
+        <!-- Notification Banners -->
+        <div th:if="${successMessage}" class="alert alert-success mb-2" th:text="${successMessage}">Success</div>
+        <div th:if="${errorMessage}" class="alert alert-error mb-2" th:text="${errorMessage}">Error</div>
+
         <div class="section-head">
-            <h2>Admin Dashboard</h2>
-            <a th:href="@{/products}" class="link">View storefront &rarr;</a>
+            <div>
+                <h2>Admin Control Center</h2>
+                <p class="text-muted">Manage system users, customer orders, product moderation, and categories.</p>
+            </div>
+            <a th:href="@{/products}" class="btn btn-outline btn-sm">Storefront &rarr;</a>
         </div>
 
+        <!-- High-Level Stats -->
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-label">Total Users</div>
@@ -20,7 +28,7 @@
             </div>
             <div class="stat-card">
                 <div class="stat-label">Total Products</div>
-                <div class="stat-value" th:text="${totalProducts}">5</div>
+                <div class="stat-value" th:text="${totalProducts}">40</div>
             </div>
             <div class="stat-card">
                 <div class="stat-label">Total Orders</div>
@@ -32,35 +40,234 @@
             </div>
         </div>
 
-        <div class="placeholder-box">
-            <h3>User &amp; Order Management - Coming in Phase 2</h3>
-            <p>In the next phase you will be able to view and manage users, orders and products from this dashboard.</p>
+        <!-- Tab Navigation -->
+        <nav class="admin-tabs" id="adminTabsNav">
+            <button type="button" class="admin-tab active" onclick="switchAdminTab('usersTab', this)">&#128101; Users (<span th:text="${#lists.size(users)}">0</span>)</button>
+            <button type="button" class="admin-tab" onclick="switchAdminTab('productsTab', this)">&#128230; Products (<span th:text="${#lists.size(products)}">0</span>)</button>
+            <button type="button" class="admin-tab" onclick="switchAdminTab('ordersTab', this)">&#128722; Orders (<span th:text="${#lists.size(orders)}">0</span>)</button>
+            <button type="button" class="admin-tab" onclick="switchAdminTab('categoriesTab', this)">&#128193; Categories</button>
+        </nav>
+
+        <!-- TAB 1: USER MANAGEMENT -->
+        <div id="usersTab" class="admin-tab-content">
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                    <tr>
+                        <th style="width:60px">ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Current Role</th>
+                        <th>Change Role</th>
+                        <th>Registered Date</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="user : ${users}">
+                        <td>#<span th:text="${user.id}">1</span></td>
+                        <td><strong th:text="${user.name}">User Name</strong></td>
+                        <td th:text="${user.email}">user@example.com</td>
+                        <td th:text="${user.phone != null ? user.phone : '-'}">-</td>
+                        <td>
+                            <span th:class="'badge-role badge-role-' + ${#strings.toLowerCase(user.role)}"
+                                  th:text="${user.role}">BUYER</span>
+                        </td>
+                        <td>
+                            <form th:action="@{/admin/users/{id}/role(id=${user.id})}" method="post" class="admin-table-actions">
+                                <select name="role" style="padding:4px 8px; font-size:0.85rem; border-radius:6px;">
+                                    <option th:each="r : ${roles}" th:value="${r}" th:text="${r}" th:selected="${r == user.role}">BUYER</option>
+                                </select>
+                                <button type="submit" class="btn btn-primary btn-sm" style="padding:4px 10px;">Update</button>
+                            </form>
+                        </td>
+                        <td th:text="${user.createdAt != null ? #temporals.format(user.createdAt, 'dd MMM yyyy') : '-'}">01 Jan 2026</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
 
-        <div class="form-card mt-2">
-            <h3>Category Management</h3>
-            <p class="text-muted">Create a top-level category or a nested subcategory.</p>
-            <form id="categoryCreateForm" class="form-row">
-                <div class="form-group"><label for="categoryName">Name</label><input id="categoryName" required></div>
-                <div class="form-group"><label for="categoryParent">Parent</label><select id="categoryParent"><option value="">Top-level category</option><option th:each="category : ${categoryOptions}" th:value="${category.id}" th:text="${category.name}">Books</option></select></div>
-                <div class="form-group"><button type="submit" class="btn btn-primary">Create Category</button></div>
-            </form>
-            <p id="categoryMessage" class="text-muted" aria-live="polite"></p>
+        <!-- TAB 2: PRODUCTS MODERATION -->
+        <div id="productsTab" class="admin-tab-content" style="display:none;">
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                    <tr>
+                        <th style="width:60px">ID</th>
+                        <th style="width:50px">Image</th>
+                        <th>Name &amp; Brand</th>
+                        <th>Category</th>
+                        <th>Price (&#8377;)</th>
+                        <th>Stock</th>
+                        <th>Seller ID</th>
+                        <th>Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="p : ${products}">
+                        <td>#<span th:text="${p.id}">1</span></td>
+                        <td>
+                            <img th:src="@{${p.imageUrl != null ? p.imageUrl : '/images/products/default.jpg'}}"
+                                 th:alt="${p.name}" style="width:40px; height:40px; object-fit:cover; border-radius:4px;"
+                                 onerror="this.onerror=null;this.src='/images/products/default.jpg';">
+                        </td>
+                        <td>
+                            <a th:href="@{/products/{id}(id=${p.id})}" target="_blank" style="font-weight:600;" th:text="${p.name}">Product Name</a>
+                            <div class="text-muted" style="font-size:0.8rem" th:if="${p.brand != null}" th:text="${p.brand}">Brand</div>
+                        </td>
+                        <td><span class="tag" th:text="${p.categoryName != null ? p.categoryName : p.category}">Category</span></td>
+                        <td>&#8377;<span th:text="${#numbers.formatDecimal(p.price, 1, 'COMMA', 2, 'POINT')}">100.00</span></td>
+                        <td>
+                            <span th:if="${p.stock > 0}" th:text="${p.stock}">10</span>
+                            <span th:if="${p.stock <= 0}" class="badge-status badge-status-CANCELLED">Out of stock</span>
+                        </td>
+                        <td th:text="${p.sellerId != null ? '#' + p.sellerId : 'Platform'}">Platform</td>
+                        <td>
+                            <form th:action="@{/admin/products/{id}/delete(id=${p.id})}" method="post"
+                                  onsubmit="return confirm('Are you sure you want to remove or deactivate this product?');">
+                                <button type="submit" class="btn btn-outline btn-sm" style="color:var(--danger); border-color:#fca5a5; padding:3px 8px;">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
+
+        <!-- TAB 3: ORDERS MANAGEMENT -->
+        <div id="ordersTab" class="admin-tab-content" style="display:none;">
+            <div class="table-wrap" th:if="${orders != null and !orders.isEmpty()}">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Order #</th>
+                        <th>Customer / Contact</th>
+                        <th>Shipping Address</th>
+                        <th>Total (&#8377;)</th>
+                        <th>Payment</th>
+                        <th>Status</th>
+                        <th>Update Status</th>
+                        <th>Date</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="order : ${orders}">
+                        <td><strong>#<span th:text="${order.id}">1</span></strong></td>
+                        <td>
+                            <div th:text="${order.shippingFullName != null ? order.shippingFullName : 'Customer'}">Name</div>
+                            <small class="text-muted" th:text="${order.shippingMobile != null ? order.shippingMobile : '-'}">9876543210</small>
+                        </td>
+                        <td style="font-size:0.85rem">
+                            <span th:text="${order.shippingAddress != null ? order.shippingAddress : 'Standard Delivery'}">Address</span>
+                        </td>
+                        <td><strong>&#8377;<span th:text="${#numbers.formatDecimal(order.totalAmount, 1, 'COMMA', 2, 'POINT')}">0.00</span></strong></td>
+                        <td>
+                            <span th:text="${order.paymentMethod}">COD</span>
+                            <small class="text-muted" th:text="'(' + ${order.paymentStatus} + ')'"></small>
+                        </td>
+                        <td>
+                            <span th:class="'badge-status badge-status-' + ${order.status}" th:text="${order.status}">CONFIRMED</span>
+                        </td>
+                        <td>
+                            <form th:action="@{/admin/orders/{id}/status(id=${order.id})}" method="post" class="admin-table-actions">
+                                <select name="status" style="padding:4px 8px; font-size:0.85rem; border-radius:6px;">
+                                    <option th:each="s : ${orderStatuses}" th:value="${s}" th:text="${s}" th:selected="${s == order.status}">CONFIRMED</option>
+                                </select>
+                                <button type="submit" class="btn btn-primary btn-sm" style="padding:4px 10px;">Save</button>
+                            </form>
+                        </td>
+                        <td th:text="${#temporals.format(order.createdAt, 'dd MMM yyyy')}">01 Jan 2026</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="empty" th:if="${orders == null or orders.isEmpty()}">
+                <div class="empty-icon">&#128722;</div>
+                <h3>No Orders Yet</h3>
+                <p>When buyers place orders in the supermarket, they will appear here in real-time.</p>
+            </div>
+        </div>
+
+        <!-- TAB 4: CATEGORY MANAGEMENT -->
+        <div id="categoriesTab" class="admin-tab-content" style="display:none;">
+            <div class="form-card mb-2">
+                <h3>Add New Category / Subcategory</h3>
+                <p class="text-muted">Create a top-level category or a nested department.</p>
+                <form id="categoryCreateForm" class="form-row">
+                    <div class="form-group" style="flex:2">
+                        <label for="categoryName">Category Name</label>
+                        <input id="categoryName" placeholder="e.g. Dairy &amp; Bakery" required>
+                    </div>
+                    <div class="form-group" style="flex:2">
+                        <label for="categoryParent">Parent Category (Optional)</label>
+                        <select id="categoryParent">
+                            <option value="">Top-level category</option>
+                            <option th:each="cat : ${categoryOptions}" th:value="${cat.id}" th:text="${cat.name}">Category</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary">Create Category</button>
+                    </div>
+                </form>
+                <p id="categoryMessage" class="text-muted" aria-live="polite"></p>
+            </div>
+        </div>
+
     </div>
 </section>
 
 <div th:replace="~{fragments/layout :: footer}"></div>
 <script th:src="@{/js/main.js}"></script>
 <script>
+function switchAdminTab(tabId, btnElem) {
+    var tabs = document.querySelectorAll('.admin-tab-content');
+    tabs.forEach(function(t) { t.style.display = 'none'; });
+    var target = document.getElementById(tabId);
+    if (target) { target.style.display = 'block'; }
+
+    var buttons = document.querySelectorAll('.admin-tab');
+    buttons.forEach(function(b) { b.classList.remove('active'); });
+    if (btnElem) { btnElem.classList.add('active'); }
+}
+
+// Auto open tab from hash if present (e.g. #orders, #products, #users)
+window.addEventListener('DOMContentLoaded', function() {
+    var hash = window.location.hash;
+    if (hash === '#orders') {
+        var btn = document.querySelectorAll('.admin-tab')[2];
+        switchAdminTab('ordersTab', btn);
+    } else if (hash === '#products') {
+        var btn = document.querySelectorAll('.admin-tab')[1];
+        switchAdminTab('productsTab', btn);
+    } else if (hash === '#categories') {
+        var btn = document.querySelectorAll('.admin-tab')[3];
+        switchAdminTab('categoriesTab', btn);
+    }
+});
+
 document.getElementById('categoryCreateForm').addEventListener('submit', function (event) {
     event.preventDefault();
-    fetch('/api/categories', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({
-        name: document.getElementById('categoryName').value,
-        parentId: document.getElementById('categoryParent').value || null
-    })}).then(function (response) { return response.json().then(function (body) { if (!response.ok) throw new Error(body.message || 'Could not create category.'); return body; }); })
-      .then(function () { document.getElementById('categoryMessage').textContent = 'Category created. Refresh the Products page to see it.'; event.target.reset(); })
-      .catch(function (error) { document.getElementById('categoryMessage').textContent = error.message; });
+    fetch('/api/categories', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            name: document.getElementById('categoryName').value,
+            parentId: document.getElementById('categoryParent').value || null
+        })
+    }).then(function (response) {
+        return response.json().then(function (body) {
+            if (!response.ok) throw new Error(body.message || 'Could not create category.');
+            return body;
+        });
+    }).then(function () {
+        document.getElementById('categoryMessage').textContent = 'Category created successfully! Refresh to see it in dropdowns.';
+        document.getElementById('categoryMessage').style.color = 'var(--primary-dark)';
+        event.target.reset();
+    }).catch(function (error) {
+        document.getElementById('categoryMessage').textContent = error.message;
+        document.getElementById('categoryMessage').style.color = 'var(--danger)';
+    });
 });
 </script>
 

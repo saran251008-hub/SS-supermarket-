@@ -2,19 +2,331 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head(title='Seller Dashboard - SS Supermarket')}"></head>
 <body class="seller-page">
+
 <header class="seller-header">
-    <div class="seller-brand"><img th:src="@{/images/logo.jpg}" alt="SS Supermarket logo"><div><strong>SS Supermarket</strong><span>Seller Portal</span></div></div>
-    <div class="seller-header-actions"><a th:href="@{/products}" class="seller-header-icon" title="View storefront">&#127978;</a><button type="button" class="seller-header-icon" title="Help">&#10067;</button>
-        <div class="seller-profile-wrap"><button type="button" class="seller-profile-toggle" id="sellerProfileToggle" aria-expanded="false"><span>&#128100;</span><span th:text="${sellerName}">Seller</span><span>&#9662;</span></button>
-            <div class="seller-profile-menu" id="sellerProfileMenu" hidden><strong th:text="${sellerName}">Seller</strong><span>Seller Account</span><a href="#profile">&#128100; My Profile</a><a href="#settings">&#9881; Settings</a><a href="#password">&#128274; Change Password</a><form th:action="@{/logout}" method="post"><button type="submit">&#128682; Logout</button></form></div>
+    <div class="seller-brand">
+        <img th:src="@{/images/logo.jpg}" alt="SS Supermarket logo">
+        <div>
+            <strong>SS Supermarket</strong>
+            <span>Seller Portal</span>
+        </div>
+    </div>
+    <div class="seller-header-actions">
+        <a th:href="@{/products}" class="btn btn-outline btn-sm" title="View storefront">&#127978; View Storefront</a>
+        <div class="seller-profile-wrap">
+            <button type="button" class="seller-profile-toggle" id="sellerProfileToggle" aria-expanded="false">
+                <span>&#128100;</span>
+                <span th:text="${sellerName}">Seller</span>
+                <span>&#9662;</span>
+            </button>
+            <div class="seller-profile-menu" id="sellerProfileMenu" hidden>
+                <strong th:text="${sellerName}">Seller</strong>
+                <span>Verified Seller</span>
+                <a th:href="@{/profile}">&#128100; My Profile</a>
+                <form th:action="@{/logout}" method="post">
+                    <button type="submit">&#128682; Logout</button>
+                </form>
+            </div>
         </div>
     </div>
 </header>
-<div class="seller-shell"><aside class="seller-sidebar"><a class="seller-sidebar-active" href="#dashboard">&#8962; Dashboard</a><a href="#products">&#128230; Products</a><a href="#orders">&#128722; Orders</a><a href="#payments">&#128176; Payments</a><a href="#analytics">&#128202; Analytics</a><a href="#profile">&#128100; Profile</a><a href="#settings">&#9881; Settings</a><form th:action="@{/logout}" method="post" class="seller-sidebar-logout"><button type="submit">&#128682; Logout</button></form></aside>
-    <main class="seller-main" id="dashboard"><div class="seller-page-heading"><div><p class="eyebrow">Seller Dashboard</p><h1>Welcome back, <span th:text="${sellerName}">Seller</span>!</h1><p class="text-muted">Here's what's happening with your store today.</p></div><a th:href="@{/products}" class="btn btn-primary">View storefront</a></div>
-        <div class="seller-stat-grid"><div class="seller-stat-card"><span class="seller-stat-icon">&#128230;</span><span class="stat-label">Orders</span><strong th:text="${orderCount}">0</strong><small>Total orders</small></div><div class="seller-stat-card"><span class="seller-stat-icon">&#128176;</span><span class="stat-label">Revenue</span><strong>&#8377;<span th:text="${#numbers.formatDecimal(revenue, 1, 'COMMA', 2, 'POINT')}">0.00</span></strong><small>Total revenue</small></div><div class="seller-stat-card"><span class="seller-stat-icon">&#128717;</span><span class="stat-label">Products</span><strong th:text="${productCount}">0</strong><small>Listed products</small></div></div>
-        <section class="seller-section" id="orders"><div class="seller-section-heading"><h2>Recent Orders</h2><span>Orders containing your products</span></div><div class="table-wrap" th:if="${!recentOrders.isEmpty()}"><table class="seller-orders-table"><thead><tr><th>Order</th><th>Product</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead><tbody><tr th:each="order : ${recentOrders}"><td>#<span th:text="${order.id}">10245</span></td><td th:text="${order.items.isEmpty() ? 'Product' : order.items[0].productName}">Product</td><td>&#8377;<span th:text="${#numbers.formatDecimal(order.totalAmount, 1, 'COMMA', 2, 'POINT')}">599.00</span></td><td><span class="order-status" th:text="${order.status}">CONFIRMED</span></td><td th:text="${#temporals.format(order.createdAt, 'dd MMM yyyy')}">20 Sep 2026</td></tr></tbody></table></div><div class="seller-empty" th:if="${recentOrders.isEmpty()}">No orders for your products yet.</div></section>
-    </main></div>
-<script th:src="@{/js/main.js}"></script><script>initSellerProfileMenu();</script>
+
+<div class="seller-shell">
+    <aside class="seller-sidebar">
+        <a class="seller-sidebar-active" href="#dashboard">&#8962; Dashboard</a>
+        <a href="#products">&#128230; My Products</a>
+        <a href="#orders">&#128722; Customer Orders</a>
+        <a th:href="@{/profile}">&#128100; Profile</a>
+        <form th:action="@{/logout}" method="post" class="seller-sidebar-logout">
+            <button type="submit">&#128682; Logout</button>
+        </form>
+    </aside>
+
+    <main class="seller-main" id="dashboard">
+        <!-- Notification Banners -->
+        <div th:if="${successMessage}" class="alert alert-success mb-2" th:text="${successMessage}">Success message</div>
+        <div th:if="${errorMessage}" class="alert alert-error mb-2" th:text="${errorMessage}">Error message</div>
+
+        <div class="seller-page-heading">
+            <div>
+                <p class="eyebrow">Seller Dashboard</p>
+                <h1>Welcome back, <span th:text="${sellerName}">Seller</span>!</h1>
+                <p class="text-muted">Manage your catalog, fulfill orders, and track store revenue.</p>
+            </div>
+            <a href="#addProductSection" class="btn btn-primary" onclick="showAddForm()">+ Add New Product</a>
+        </div>
+
+        <!-- Metric Stat Cards -->
+        <div class="seller-stat-grid">
+            <div class="seller-stat-card">
+                <span class="seller-stat-icon">&#128717;</span>
+                <span class="stat-label">Listed Products</span>
+                <strong th:text="${productCount}">0</strong>
+                <small>Active in storefront</small>
+            </div>
+            <div class="seller-stat-card">
+                <span class="seller-stat-icon">&#128230;</span>
+                <span class="stat-label">Total Orders</span>
+                <strong th:text="${orderCount}">0</strong>
+                <small>Customer purchases</small>
+            </div>
+            <div class="seller-stat-card">
+                <span class="seller-stat-icon">&#128176;</span>
+                <span class="stat-label">Revenue</span>
+                <strong>&#8377;<span th:text="${#numbers.formatDecimal(revenue, 1, 'COMMA', 2, 'POINT')}">0.00</span></strong>
+                <small>Gross sales revenue</small>
+            </div>
+        </div>
+
+        <!-- Add Product Form Card (Collapsible) -->
+        <section class="seller-section mb-2" id="addProductSection" style="display: none; border-left: 4px solid var(--primary);">
+            <div class="seller-section-heading">
+                <h2>Add New Product to Supermarket</h2>
+                <button type="button" class="btn btn-outline btn-sm" onclick="hideAddForm()">&times; Close Form</button>
+            </div>
+            <p class="text-muted mb-2">Fill in the product details. It will immediately appear on the storefront for all buyers.</p>
+
+            <form th:action="@{/seller/products}" method="post" th:object="${productForm}">
+                <div class="form-row">
+                    <div class="form-group" style="flex:2">
+                        <label for="pName">Product Name *</label>
+                        <input type="text" id="pName" th:field="*{name}" placeholder="e.g. Organic Farm Fresh Eggs 12pk" required>
+                    </div>
+                    <div class="form-group" style="flex:1">
+                        <label for="pBrand">Brand / Farm Name</label>
+                        <input type="text" id="pBrand" th:field="*{brand}" placeholder="e.g. PureFarm or SS Choice">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group" style="flex:1">
+                        <label for="pCategory">Category *</label>
+                        <select id="pCategory" th:field="*{categoryId}" required onchange="syncCategoryText(this)">
+                            <option value="">Select Category</option>
+                            <option th:each="cat : ${categoryOptions}" th:value="${cat.id}" th:text="${cat.name}">Category</option>
+                        </select>
+                        <input type="hidden" id="categoryNameField" th:field="*{category}" value="General">
+                    </div>
+                    <div class="form-group" style="flex:1">
+                        <label for="pPrice">Price (&#8377; INR) *</label>
+                        <input type="number" id="pPrice" th:field="*{price}" step="0.01" min="1" placeholder="99.00" required>
+                    </div>
+                    <div class="form-group" style="flex:1">
+                        <label for="pStock">Available Stock (Units) *</label>
+                        <input type="number" id="pStock" th:field="*{stock}" min="0" placeholder="50" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="pImageUrl">Image URL</label>
+                    <input type="url" id="pImageUrl" th:field="*{imageUrl}" placeholder="https://images.unsplash.com/... or leave blank for default image">
+                    <small class="text-muted">You can paste any web image URL (Unsplash, imgur, etc.). A fallback image will be used if blank.</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="pDesc">Product Description</label>
+                    <textarea id="pDesc" th:field="*{description}" rows="3" placeholder="Provide description, ingredients, weight, or shelf life..."></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Publish Product Now</button>
+                <button type="button" class="btn btn-outline" onclick="hideAddForm()">Cancel</button>
+            </form>
+        </section>
+
+        <!-- Seller Products Management Table -->
+        <section class="seller-section mb-2" id="products">
+            <div class="seller-section-heading">
+                <div>
+                    <h2>My Listed Products</h2>
+                    <span>Manage your product catalog, prices, and inventory</span>
+                </div>
+                <button type="button" class="btn btn-primary btn-sm" onclick="showAddForm()">+ Add Product</button>
+            </div>
+
+            <div class="table-wrap" th:if="${sellerProducts != null and !sellerProducts.isEmpty()}">
+                <table>
+                    <thead>
+                    <tr>
+                        <th style="width:60px">Image</th>
+                        <th>Product Name</th>
+                        <th>Category</th>
+                        <th>Price (&#8377;)</th>
+                        <th>Stock</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="p : ${sellerProducts}">
+                        <td>
+                            <img th:src="@{${p.imageUrl != null ? p.imageUrl : '/images/products/default.jpg'}}"
+                                 th:alt="${p.name}" style="width:48px; height:48px; object-fit:cover; border-radius:6px;"
+                                 onerror="this.onerror=null;this.src='/images/products/default.jpg';">
+                        </td>
+                        <td>
+                            <strong th:text="${p.name}">Product Name</strong>
+                            <div class="text-muted" style="font-size:0.8rem" th:if="${p.brand != null}" th:text="'Brand: ' + ${p.brand}">Brand</div>
+                        </td>
+                        <td>
+                            <span class="tag" th:text="${p.categoryName != null ? p.categoryName : p.category}">Category</span>
+                        </td>
+                        <td>
+                            <strong>&#8377;<span th:text="${#numbers.formatDecimal(p.price, 1, 'COMMA', 2, 'POINT')}">100.00</span></strong>
+                        </td>
+                        <td>
+                            <span th:if="${p.stock > 10}" class="badge-status badge-status-DELIVERED" th:text="${p.stock + ' in stock'}">In stock</span>
+                            <span th:if="${p.stock > 0 and p.stock <= 10}" class="badge-status badge-status-PENDING" th:text="${p.stock + ' low stock'}">Low stock</span>
+                            <span th:if="${p.stock <= 0}" class="badge-status badge-status-CANCELLED">Out of stock</span>
+                        </td>
+                        <td>
+                            <div style="display:flex; gap:6px;">
+                                <button type="button" class="btn btn-outline btn-sm"
+                                        th:onclick="'openEditModal(' + ${p.id} + ', ' + ${#strings.escapeJavaScript(p.name)} + ', ' + ${#strings.escapeJavaScript(p.brand != null ? p.brand : '')} + ', ' + ${p.price} + ', ' + ${p.stock} + ', ' + ${#strings.escapeJavaScript(p.imageUrl != null ? p.imageUrl : '')} + ', ' + ${#strings.escapeJavaScript(p.description != null ? p.description : '')} + ')'">
+                                    Edit
+                                </button>
+                                <form th:action="@{/seller/products/{id}/delete(id=${p.id})}" method="post" onsubmit="return confirm('Are you sure you want to delete or deactivate this product?');">
+                                    <button type="submit" class="btn btn-outline btn-sm" style="color:var(--danger); border-color:#fca5a5;">Delete</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="seller-empty" th:if="${sellerProducts == null or sellerProducts.isEmpty()}">
+                <div style="font-size:2.5rem; margin-bottom:8px;">&#128717;</div>
+                <h3>No products listed yet</h3>
+                <p>Click "Add Product" above to list your first supermarket item for buyers.</p>
+                <button type="button" class="btn btn-primary" onclick="showAddForm()">+ Add Your First Product</button>
+            </div>
+        </section>
+
+        <!-- Customer Orders Table -->
+        <section class="seller-section" id="orders">
+            <div class="seller-section-heading">
+                <div>
+                    <h2>Recent Customer Orders</h2>
+                    <span>Orders containing your supermarket items</span>
+                </div>
+            </div>
+            <div class="table-wrap" th:if="${recentOrders != null and !recentOrders.isEmpty()}">
+                <table class="seller-orders-table">
+                    <thead>
+                    <tr>
+                        <th>Order #</th>
+                        <th>Product(s)</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="order : ${recentOrders}">
+                        <td>#<span th:text="${order.id}">10245</span></td>
+                        <td th:text="${order.items.isEmpty() ? 'Product' : order.items[0].productName + (order.items.size() > 1 ? ' +' + (order.items.size() - 1) + ' more' : '')}">Product</td>
+                        <td>&#8377;<span th:text="${#numbers.formatDecimal(order.totalAmount, 1, 'COMMA', 2, 'POINT')}">599.00</span></td>
+                        <td>
+                            <span th:class="'badge-status badge-status-' + ${order.status}" th:text="${order.status}">CONFIRMED</span>
+                        </td>
+                        <td th:text="${#temporals.format(order.createdAt, 'dd MMM yyyy')}">20 Sep 2026</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="seller-empty" th:if="${recentOrders == null or recentOrders.isEmpty()}">
+                No customer orders received yet.
+            </div>
+        </section>
+    </main>
+</div>
+
+<!-- Edit Product Modal -->
+<div id="editProductModal" style="display:none; position:fixed; z-index:9999; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; padding:16px;">
+    <div style="background:var(--white); border-radius:12px; max-width:540px; width:100%; padding:24px; box-shadow:var(--shadow-lg); max-height:90vh; overflow-y:auto;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+            <h3>Edit Product</h3>
+            <button type="button" class="btn btn-outline btn-sm" onclick="closeEditModal()">&times;</button>
+        </div>
+        <form id="editProductForm" method="post">
+            <div class="form-group">
+                <label for="editName">Product Name *</label>
+                <input type="text" id="editName" name="name" required>
+            </div>
+            <div class="form-row">
+                <div class="form-group" style="flex:1">
+                    <label for="editBrand">Brand</label>
+                    <input type="text" id="editBrand" name="brand">
+                </div>
+                <div class="form-group" style="flex:1">
+                    <label for="editPrice">Price (&#8377;) *</label>
+                    <input type="number" id="editPrice" name="price" step="0.01" min="1" required>
+                </div>
+                <div class="form-group" style="flex:1">
+                    <label for="editStock">Stock *</label>
+                    <input type="number" id="editStock" name="stock" min="0" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="editImageUrl">Image URL</label>
+                <input type="url" id="editImageUrl" name="imageUrl">
+            </div>
+            <div class="form-group">
+                <label for="editDescription">Description</label>
+                <textarea id="editDescription" name="description" rows="3"></textarea>
+            </div>
+            <input type="hidden" name="category" value="General">
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+                <button type="button" class="btn btn-outline" onclick="closeEditModal()">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script th:src="@{/js/main.js}"></script>
+<script>
+    if (typeof initSellerProfileMenu === 'function') {
+        initSellerProfileMenu();
+    }
+
+    function showAddForm() {
+        var el = document.getElementById('addProductSection');
+        if (el) {
+            el.style.display = 'block';
+            el.scrollIntoView({ behavior: 'smooth' });
+        }
+    }
+
+    function hideAddForm() {
+        var el = document.getElementById('addProductSection');
+        if (el) {
+            el.style.display = 'none';
+        }
+    }
+
+    function syncCategoryText(selectElem) {
+        if (selectElem.selectedIndex >= 0) {
+            var text = selectElem.options[selectElem.selectedIndex].text;
+            document.getElementById('categoryNameField').value = text.trim();
+        }
+    }
+
+    function openEditModal(id, name, brand, price, stock, imageUrl, desc) {
+        var modal = document.getElementById('editProductModal');
+        var form = document.getElementById('editProductForm');
+        form.action = '/seller/products/' + id + '/edit';
+        document.getElementById('editName').value = name || '';
+        document.getElementById('editBrand').value = brand || '';
+        document.getElementById('editPrice').value = price || '';
+        document.getElementById('editStock').value = stock || '';
+        document.getElementById('editImageUrl').value = imageUrl || '';
+        document.getElementById('editDescription').value = desc || '';
+        modal.style.display = 'flex';
+    }
+
+    function closeEditModal() {
+        document.getElementById('editProductModal').style.display = 'none';
+    }
+</script>
 </body>
 </html>

@@ -139,4 +139,33 @@ public class OrderService {
     public BigDecimal getTotalRevenue() {
         return orderRepository.sumTotalAmount();
     }
+
+    @Transactional(readOnly = true)
+    public List<OrderResponse> listAllOrders() {
+        return orderRepository.findAllByOrderByCreatedAtDesc().stream()
+                .map(order -> {
+                    OrderResponse response = OrderResponse.fromEntity(order);
+                    response.setItems(order.getOrderItems().stream()
+                            .map(OrderItemResponse::fromEntity)
+                            .toList());
+                    return response;
+                })
+                .toList();
+    }
+
+    @Transactional
+    public OrderResponse updateOrderStatus(Long orderId, OrderStatus status) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new OrderNotFoundException("Order not found with id " + orderId));
+        order.setStatus(status);
+        if (status == OrderStatus.DELIVERED) {
+            order.setPaymentStatus(PaymentStatus.SUCCESS);
+        }
+        Order saved = orderRepository.save(order);
+        OrderResponse response = OrderResponse.fromEntity(saved);
+        response.setItems(saved.getOrderItems().stream()
+                .map(OrderItemResponse::fromEntity)
+                .toList());
+        return response;
+    }
 }

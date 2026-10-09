@@ -82,6 +82,12 @@ public class Product {
         this.sellerId = sellerId;
     }
 
+    public Product(String name, String description, BigDecimal price, String category,
+                   String imageUrl, Integer stock, Long sellerId, String brand) {
+        this(name, description, price, category, imageUrl, stock, sellerId);
+        this.brand = brand;
+    }
+
     public Long getId() {
         return id;
     }

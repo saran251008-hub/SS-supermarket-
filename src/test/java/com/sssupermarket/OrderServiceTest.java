@@ -70,8 +70,8 @@ class OrderServiceTest {
                 productRepository.save(product);
             }
         }
-        laptop = productRepository.findByNameContainingIgnoreCaseOrderByCreatedAtDesc("Laptop").get(0);
-        keyboard = productRepository.findByNameContainingIgnoreCaseOrderByCreatedAtDesc("Keyboard").get(0);
+        laptop = productRepository.findByName("Laptop").orElseThrow();
+        keyboard = productRepository.findByName("Keyboard").orElseThrow();
     }
 
     private Long createBuyer(String prefix) {

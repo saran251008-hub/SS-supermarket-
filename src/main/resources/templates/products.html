@@ -48,7 +48,8 @@
                 <a th:href="@{/products/{id}(id=${product.id})}">
                     <div class="card-media">
                         <img th:src="@{${product.imageUrl != null ? product.imageUrl : '/images/products/default.jpg'}}"
-                             th:alt="${product.name}">
+                             th:alt="${product.name}"
+                             onerror="this.onerror=null;this.src='/images/products/default.jpg';">
                     </div>
                 </a>
                 <div class="card-body">

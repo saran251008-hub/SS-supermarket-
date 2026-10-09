@@ -20,6 +20,7 @@ public class OrderResponse {
     private PaymentMethod paymentMethod;
     private PaymentStatus paymentStatus;
     private String shippingFullName;
+    private String shippingMobile;
     private String shippingAddress;
 
     public OrderResponse() {
@@ -34,6 +35,7 @@ public class OrderResponse {
         response.setPaymentMethod(order.getPaymentMethod());
         response.setPaymentStatus(order.getPaymentStatus());
         response.setShippingFullName(order.getShippingFullName());
+        response.setShippingMobile(order.getShippingMobile());
         if (order.getShippingAddressLine1() != null) {
             response.setShippingAddress(order.getShippingAddressLine1() + ", " + order.getShippingCity() + ", "
                 + order.getShippingState() + " " + order.getShippingPincode());
@@ -83,5 +85,6 @@ public class OrderResponse {
     public PaymentMethod getPaymentMethod(){return paymentMethod;} public void setPaymentMethod(PaymentMethod v){paymentMethod=v;}
     public PaymentStatus getPaymentStatus(){return paymentStatus;} public void setPaymentStatus(PaymentStatus v){paymentStatus=v;}
     public String getShippingFullName(){return shippingFullName;} public void setShippingFullName(String v){shippingFullName=v;}
+    public String getShippingMobile(){return shippingMobile;} public void setShippingMobile(String v){shippingMobile=v;}
     public String getShippingAddress(){return shippingAddress;} public void setShippingAddress(String v){shippingAddress=v;}
 }

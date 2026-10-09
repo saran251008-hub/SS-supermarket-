@@ -46,7 +46,22 @@
                     </tbody>
                 </table>
                 <h3 class="mt-2 mb-1">3. Payment Method</h3>
-                <div class="form-group"><label><input type="radio" name="paymentMethod" value="COD" required> Cash on Delivery</label><label><input type="radio" name="paymentMethod" value="ONLINE"> Online Payment (mock)</label></div>
+                <div class="payment-methods-grid">
+                    <label class="payment-card-option">
+                        <input type="radio" name="paymentMethod" value="COD" checked required>
+                        <div class="payment-card-info">
+                            <span class="payment-card-title">&#128181; Cash on Delivery (COD)</span>
+                            <span class="payment-card-desc">Pay with cash or scan UPI when your order is delivered. Recommended & active.</span>
+                        </div>
+                    </label>
+                    <label class="payment-card-option">
+                        <input type="radio" name="paymentMethod" value="ONLINE">
+                        <div class="payment-card-info">
+                            <span class="payment-card-title">&#128179; Online Payment (UPI / Cards)</span>
+                            <span class="payment-card-desc">Instant payment simulation mode. Instant order confirmation.</span>
+                        </div>
+                    </label>
+                </div>
                 <button type="submit" class="btn btn-primary">Place Order</button>
                 </form>
             </div>

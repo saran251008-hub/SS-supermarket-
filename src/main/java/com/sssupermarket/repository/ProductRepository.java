@@ -48,4 +48,16 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findByCategoryEntityIdIn(List<Long> categoryIds);
 
     boolean existsByCategoryEntityId(Long categoryId);
+
+    boolean existsByName(String name);
+
+    Optional<Product> findByName(String name);
+
+    Optional<Product> findByNameIgnoreCase(String name);
+
+    List<Product> findBySellerIdOrderByCreatedAtDesc(Long sellerId);
+
+    Optional<Product> findByIdAndSellerId(Long id, Long sellerId);
+
+    List<Product> findAllByOrderByCreatedAtDesc();
 }

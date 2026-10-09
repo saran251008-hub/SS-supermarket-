@@ -29,6 +29,14 @@
             <label for="password">Password</label><input type="password" id="password" name="password" placeholder="Your password" required>
             <button type="submit" class="btn btn-primary btn-block">Login</button>
         </form>
+        <details class="demo-credentials-card" style="margin-top:16px;">
+            <summary>&#128273; Demo Account Logins (Click to view)</summary>
+            <div class="demo-credentials-list">
+                <div><strong>Admin Portal:</strong> <code>admin@sssupermarket.com</code> / <code>Admin@123</code></div>
+                <div><strong>Seller Portal:</strong> <code>seller@sssupermarket.com</code> / <code>Seller@123</code></div>
+                <div><strong>Buyer Account:</strong> Register a new account or use your personal email.</div>
+            </div>
+        </details>
         <p class="auth-trust">By continuing, you agree to our <a href="#terms">Terms of Service</a> and <a href="#privacy">Privacy Policy</a>.</p>
         <p class="text-center text-muted">Don't have an account? <a th:href="@{/register}">Register here</a></p>
     </section>

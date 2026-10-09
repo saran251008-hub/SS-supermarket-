@@ -14,7 +14,8 @@
              th:if="${product}">
             <div class="card-media" style="aspect-ratio:auto; min-height:340px; border:1px solid var(--border); border-radius:var(--radius)">
                 <img th:src="@{${product.imageUrl != null ? product.imageUrl : '/images/products/default.jpg'}}"
-                     th:alt="${product.name}">
+                     th:alt="${product.name}"
+                     onerror="this.onerror=null;this.src='/images/products/default.jpg';">
             </div>
 
             <div>
