@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(title='My Profile - SS Supermarket')}"></head>
+<body>
+<div th:replace="~{fragments/layout :: navbar}"></div>
+<section class="section">
+    <div class="container">
+        <div class="section-head"><h1>My Profile</h1><a th:href="@{/products}" class="link">Continue shopping</a></div>
+        <div class="form-card profile-card">
+            <p><strong>Name: </strong><span th:text="${user.name}">Buyer</span></p>
+            <p><strong>Email: </strong><span th:text="${user.email}">buyer@example.com</span></p>
+            <p><strong>Phone: </strong><span th:text="${user.phone != null ? user.phone : 'Not added'}">Not added</span></p>
+            <p><strong>Account type: </strong><span th:text="${user.role}">BUYER</span></p>
+        </div>
+    </div>
+</section>
+<div th:replace="~{fragments/layout :: footer}"></div>
+<script th:src="@{/js/main.js}"></script>
+</body>
+</html>

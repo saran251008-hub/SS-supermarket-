@@ -9,11 +9,16 @@ public class ProductResponse {
     private Long id;
     private String name;
     private String description;
+    private String brand;
     private BigDecimal price;
     private String category;
+    private Long categoryId;
+    private String categoryName;
     private String imageUrl;
     private Integer stock;
     private Long sellerId;
+    private String sellerName;
+    private String sellerPhone;
 
     public ProductResponse() {
     }
@@ -23,8 +28,18 @@ public class ProductResponse {
         response.setId(product.getId());
         response.setName(product.getName());
         response.setDescription(product.getDescription());
+        response.setBrand(product.getBrand());
         response.setPrice(product.getPrice());
-        response.setCategory(product.getCategory());
+        if (product.getCategoryEntity() != null) {
+             String actualCategoryName = product.getCategoryEntity().getName();
+
+        response.setCategory(actualCategoryName);
+        response.setCategoryId(product.getCategoryEntity().getId());
+        response.setCategoryName(actualCategoryName);
+              } 
+         else {
+    response.setCategory(product.getCategory());
+               }
         response.setImageUrl(product.getImageUrl());
         response.setStock(product.getStock());
         response.setSellerId(product.getSellerId());
@@ -55,6 +70,9 @@ public class ProductResponse {
         this.description = description;
     }
 
+    public String getBrand() { return brand; }
+    public void setBrand(String brand) { this.brand = brand; }
+
     public BigDecimal getPrice() {
         return price;
     }
@@ -70,6 +88,11 @@ public class ProductResponse {
     public void setCategory(String category) {
         this.category = category;
     }
+
+    public Long getCategoryId() { return categoryId; }
+    public void setCategoryId(Long categoryId) { this.categoryId = categoryId; }
+    public String getCategoryName() { return categoryName; }
+    public void setCategoryName(String categoryName) { this.categoryName = categoryName; }
 
     public String getImageUrl() {
         return imageUrl;
@@ -93,5 +116,21 @@ public class ProductResponse {
 
     public void setSellerId(Long sellerId) {
         this.sellerId = sellerId;
+    }
+
+    public String getSellerName() {
+        return sellerName;
+    }
+
+    public void setSellerName(String sellerName) {
+        this.sellerName = sellerName;
+    }
+
+    public String getSellerPhone() {
+        return sellerPhone;
+    }
+
+    public void setSellerPhone(String sellerPhone) {
+        this.sellerPhone = sellerPhone;
     }
 }

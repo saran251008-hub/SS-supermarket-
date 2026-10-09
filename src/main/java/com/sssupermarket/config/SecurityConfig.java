@@ -26,10 +26,12 @@ public class SecurityConfig {
         http
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/", "/register", "/login", "/css/**", "/js/**", "/images/**", "/error/**", "/favicon.ico").permitAll()
-                .requestMatchers(HttpMethod.GET, "/products", "/products/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/products", "/products/**").authenticated()
                 .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/products", "/api/products/**").permitAll()
-                .requestMatchers("/cart/**", "/checkout/**", "/order-success", "/api/cart/**").authenticated()
+                .requestMatchers("/api/categories/**").authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/products/personalized").authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/products", "/api/products/**").authenticated()
+                .requestMatchers("/cart/**", "/checkout/**", "/order-success", "/api/cart/**").hasRole("BUYER")
                 .requestMatchers("/orders/**", "/api/orders/**").hasRole("BUYER")
                 .requestMatchers("/seller/**", "/api/seller/**").hasRole("SELLER")
                 .requestMatchers("/admin/**", "/api/admin/**").hasRole("ADMIN")

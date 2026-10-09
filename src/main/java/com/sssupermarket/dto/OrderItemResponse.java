@@ -21,7 +21,7 @@ public class OrderItemResponse {
         OrderItemResponse response = new OrderItemResponse();
         response.setId(orderItem.getId());
         response.setProductId(orderItem.getProduct().getId());
-        response.setProductName(orderItem.getProduct().getName());
+        response.setProductName(orderItem.getProductName() != null ? orderItem.getProductName() : orderItem.getProduct().getName());
         response.setImageUrl(orderItem.getProduct().getImageUrl());
         response.setQuantity(orderItem.getQuantity());
         response.setPrice(orderItem.getPrice());

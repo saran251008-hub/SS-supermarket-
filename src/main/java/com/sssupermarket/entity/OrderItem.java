@@ -34,6 +34,9 @@ public class OrderItem {
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal price;
 
+    @Column(name = "product_name", length = 150)
+    private String productName;
+
     public OrderItem() {
     }
 
@@ -42,6 +45,7 @@ public class OrderItem {
         this.product = product;
         this.quantity = quantity;
         this.price = price;
+        this.productName = product.getName();
     }
 
     public Long getId() {
@@ -83,4 +87,7 @@ public class OrderItem {
     public void setPrice(BigDecimal price) {
         this.price = price;
     }
+
+    public String getProductName() { return productName; }
+    public void setProductName(String productName) { this.productName = productName; }
 }

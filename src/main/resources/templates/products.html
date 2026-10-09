@@ -20,16 +20,25 @@
             </div>
             <div class="form-group" style="flex:1">
                 <label for="category">Category</label>
-                <select id="category" name="category">
-                    <option value="" th:selected="${selectedCategory == ''}">All categories</option>
-                    <option th:each="cat : ${categories}" th:value="${cat}"
-                            th:selected="${selectedCategory == cat}" th:text="${cat}">Electronics</option>
+                <select id="category" name="categoryId">
+                    <option value="" th:selected="${selectedCategoryId == null}">All categories</option>
+                    <option th:each="cat : ${categoryOptions}" th:value="${cat.id}"
+                            th:selected="${selectedCategoryId == cat.id}" th:text="${cat.name}">Electronics</option>
                 </select>
+                <input type="hidden" name="includeChildren" value="true">
             </div>
             <div class="form-group">
                 <button type="submit" class="btn btn-primary">Apply Filters</button>
             </div>
+            <div class="form-group"><a th:href="@{/products}" class="btn btn-outline">Clear Filters</a></div>
         </form>
+
+        <nav class="category-breadcrumb" th:if="${!breadcrumb.isEmpty()}" aria-label="Breadcrumb">
+            <a th:href="@{/products}">Home</a>
+            <span th:each="crumb, state : ${breadcrumb}">
+                <span> / </span><a th:href="@{/products(categoryId=${crumb.id}, includeChildren=true)}" th:text="${crumb.name}">Books</a>
+            </span>
+        </nav>
 
         <p th:if="${!products.isEmpty()}" class="text-muted mb-2"
            th:text="${#lists.size(products) + ' product(s) found'}">Products found</p>
@@ -38,12 +47,12 @@
             <div class="card" th:each="product : ${products}">
                 <a th:href="@{/products/{id}(id=${product.id})}">
                     <div class="card-media">
-                        <img th:src="@{${product.imageUrl != null ? product.imageUrl : '/images/products/default.svg'}}"
+                        <img th:src="@{${product.imageUrl != null ? product.imageUrl : '/images/products/default.jpg'}}"
                              th:alt="${product.name}">
                     </div>
                 </a>
                 <div class="card-body">
-                    <span class="tag" th:text="${product.category}">Electronics</span>
+                    <span class="tag" th:text="${product.categoryName != null ? product.categoryName : product.category}">Electronics</span>
                     <h3>
                         <a th:href="@{/products/{id}(id=${product.id})}" th:text="${product.name}">Laptop</a>
                     </h3>
@@ -52,6 +61,14 @@
                         <span th:if="${product.stock > 0}" class="stock-info"
                               th:text="${product.stock <= 5 ? 'Only ' + product.stock + ' left' : 'In stock'}">In stock</span>
                         <span th:if="${product.stock <= 0}" class="stock-info out">Out of stock</span>
+                    </div>
+                    <div class="seller-contact" th:if="${product.sellerName != null}">
+                        <span>Sold by <strong th:text="${product.sellerName}">Seller</strong></span>
+                        <a th:if="${product.sellerPhone != null}" th:href="'tel:' + ${product.sellerPhone}"
+                           class="seller-phone" th:aria-label="'Call ' + ${product.sellerName}">
+                            <span aria-hidden="true">&#9742;</span>
+                            <span th:text="${product.sellerPhone}">9876543210</span>
+                        </a>
                     </div>
                     <div class="card-actions">
                         <a th:href="@{/products/{id}(id=${product.id})}" class="btn btn-outline btn-sm">View Details</a>

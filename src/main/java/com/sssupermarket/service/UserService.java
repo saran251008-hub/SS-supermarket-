@@ -26,6 +26,10 @@ public class UserService {
         if (request.getRole() == Role.ADMIN) {
             throw new InvalidRoleException("Registration as ADMIN is not allowed.");
         }
+        if (request.getRole() == Role.SELLER
+                && (request.getPhone() == null || request.getPhone().isBlank())) {
+            throw new IllegalArgumentException("Seller phone number is required and must contain exactly 10 digits.");
+        }
         if (!request.getPassword().equals(request.getConfirmPassword())) {
             throw new IllegalArgumentException("Passwords do not match.");
         }
@@ -35,6 +39,7 @@ public class UserService {
         }
         User user = new User(request.getName().trim(), email,
                 passwordEncoder.encode(request.getPassword()), request.getRole());
+        user.setPhone(request.getPhone() == null ? null : request.getPhone().trim());
         return userRepository.save(user);
     }
 

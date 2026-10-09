@@ -32,6 +32,9 @@ public class User {
     @Column(nullable = false, unique = true, length = 150)
     private String email;
 
+    @Column(length = 10)
+    private String phone;
+
     @JsonIgnore
     @Column(nullable = false)
     private String password;
@@ -88,6 +91,14 @@ public class User {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
     public String getPassword() {

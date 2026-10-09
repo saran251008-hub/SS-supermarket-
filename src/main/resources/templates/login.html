@@ -1,39 +1,38 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head(title='Login - SS Supermarket')}"></head>
-<body>
+<body class="auth-page">
+<main class="auth-shell">
+    <a class="auth-logo" th:href="@{/}"><img th:src="@{/images/logo.jpg}" alt="SS Supermarket logo"><span>SS <em>Supermarket</em></span></a>
+    <section class="auth-card">
+        <h1>Welcome back</h1>
+        <p class="subtitle">Sign in securely to shop and manage your account.</p>
+        <div th:if="${param.error}" class="alert alert-error">Invalid email or password. Check your credentials or use OTP login.</div>
+        <div th:if="${param.logout}" class="alert alert-success">You have been logged out successfully.</div>
 
-<div th:replace="~{fragments/layout :: navbar}"></div>
-
-<section class="section">
-    <div class="container">
-        <form class="form-card" th:action="@{/login}" method="post">
-            <h2>Welcome back</h2>
-            <p class="subtitle">Log in to continue shopping at SS Supermarket.</p>
-
-            <div th:if="${param.error}" class="alert alert-error">Invalid email or password. Please try again.</div>
-            <div th:if="${param.logout}" class="alert alert-success">You have been logged out successfully.</div>
-
-            <div class="form-group">
-                <label for="username">Email</label>
-                <input type="email" id="username" name="username" placeholder="you@example.com" required autofocus>
+        <div class="auth-tabs"><button type="button" class="auth-tab auth-tab-active" data-auth-tab="otp">Login with OTP</button><button type="button" class="auth-tab" data-auth-tab="password">Email and password</button></div>
+        <div id="otpPanel">
+            <label for="otpIdentifier">Mobile number or email</label>
+            <input id="otpIdentifier" type="text" autocomplete="username" placeholder="10-digit mobile or you@example.com" autofocus>
+            <p id="otpInputError" class="auth-field-error" aria-live="polite"></p>
+            <button id="sendOtpButton" type="button" class="btn btn-primary btn-block" disabled>Send OTP</button>
+            <div id="otpVerifyPanel" hidden class="otp-verify-panel">
+                <label for="otpCode">Enter the 6-digit OTP</label>
+                <input id="otpCode" type="text" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="123456">
+                <p id="otpMessage" class="auth-message" aria-live="polite"></p>
+                <button id="verifyOtpButton" type="button" class="btn btn-primary btn-block">Verify OTP</button>
+                <button id="resendOtpButton" type="button" class="btn btn-link btn-block" disabled>Resend OTP in 60s</button>
             </div>
-
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" placeholder="Your password" required>
-            </div>
-
+        </div>
+        <form id="passwordPanel" class="auth-password-panel" th:action="@{/login}" method="post" hidden>
+            <label for="username">Email</label><input type="email" id="username" name="username" placeholder="you@example.com" required>
+            <label for="password">Password</label><input type="password" id="password" name="password" placeholder="Your password" required>
             <button type="submit" class="btn btn-primary btn-block">Login</button>
-
-            <p class="text-center mt-2 text-muted">Don't have an account?
-                <a th:href="@{/register}">Register here</a>
-            </p>
         </form>
-    </div>
-</section>
-
-<div th:replace="~{fragments/layout :: footer}"></div>
+        <p class="auth-trust">By continuing, you agree to our <a href="#terms">Terms of Service</a> and <a href="#privacy">Privacy Policy</a>.</p>
+        <p class="text-center text-muted">Don't have an account? <a th:href="@{/register}">Register here</a></p>
+    </section>
+</main>
 <script th:src="@{/js/main.js}"></script>
 
 </body>

@@ -40,8 +40,10 @@ public class AuthService {
                                  HttpServletResponse httpResponse) {
         User user = userService.register(request);
         authenticateAndSetSession(httpRequest, httpResponse, user.getEmail(), request.getPassword());
-        return new AuthResponse(user.getId(), user.getName(), user.getEmail(), user.getRole(),
-                "Registration successful. You are now logged in.");
+        AuthResponse response = new AuthResponse(user.getId(), user.getName(), user.getEmail(), user.getRole(),
+            "Registration successful. You are now logged in.");
+        response.setPhone(user.getPhone());
+        return response;
     }
 
     @Transactional(readOnly = true)
@@ -51,8 +53,10 @@ public class AuthService {
         authenticateAndSetSession(httpRequest, httpResponse, email, request.getPassword());
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new InvalidCredentialsException("Invalid email or password."));
-        return new AuthResponse(user.getId(), user.getName(), user.getEmail(), user.getRole(),
-                "Login successful.");
+        AuthResponse response = new AuthResponse(user.getId(), user.getName(), user.getEmail(), user.getRole(),
+            "Login successful.");
+        response.setPhone(user.getPhone());
+        return response;
     }
 
     public void logout(HttpServletRequest httpRequest) {

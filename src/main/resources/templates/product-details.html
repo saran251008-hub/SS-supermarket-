@@ -13,7 +13,7 @@
         <div class="mt-2" style="display:grid; gap:36px; grid-template-columns: 1fr 1fr; align-items:start"
              th:if="${product}">
             <div class="card-media" style="aspect-ratio:auto; min-height:340px; border:1px solid var(--border); border-radius:var(--radius)">
-                <img th:src="@{${product.imageUrl != null ? product.imageUrl : '/images/products/default.svg'}}"
+                <img th:src="@{${product.imageUrl != null ? product.imageUrl : '/images/products/default.jpg'}}"
                      th:alt="${product.name}">
             </div>
 
@@ -23,6 +23,16 @@
                 <p class="text-muted mt-1" th:text="${product.description}">Description</p>
 
                 <p class="price price-lg mt-2">&#8377;<span th:text="${#numbers.formatDecimal(product.price, 1, 'COMMA', 2, 'POINT')}">45000.00</span></p>
+
+                <div class="seller-panel" th:if="${product.sellerName != null}">
+                    <span class="text-muted">Sold by</span>
+                    <strong th:text="${product.sellerName}">Seller</strong>
+                    <a th:if="${product.sellerPhone != null}" th:href="'tel:' + ${product.sellerPhone}"
+                       class="seller-phone" th:aria-label="'Call ' + ${product.sellerName}">
+                        <span aria-hidden="true">&#9742;</span>
+                        <span th:text="${product.sellerPhone}">9876543210</span>
+                    </a>
+                </div>
 
                 <p th:if="${product.stock > 0}" class="stock-info mt-1"
                    th:text="'Available stock: ' + ${product.stock}">Available stock</p>

@@ -1,43 +1,20 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head(title='Seller Dashboard - SS Supermarket')}"></head>
-<body>
-
-<div th:replace="~{fragments/layout :: navbar}"></div>
-<div th:replace="~{fragments/layout :: messages}"></div>
-
-<section class="section">
-    <div class="container">
-        <div class="section-head">
-            <h2>Seller Dashboard</h2>
-            <a th:href="@{/products}" class="link">View storefront &rarr;</a>
-        </div>
-
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-label">Welcome</div>
-                <div class="stat-value" th:text="${sellerName}">Seller</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">My Products</div>
-                <div class="stat-value" th:text="${productCount}">0</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Member Since</div>
-                <div class="stat-value" style="font-size:1.1rem"
-                     th:text="${#temporals.format(memberSince, 'dd MMM yyyy')}">2026</div>
-            </div>
-        </div>
-
-        <div class="placeholder-box">
-            <h3>Product Management - Coming in Phase 2</h3>
-            <p>In the next phase you will be able to add, edit and remove your own products, and view orders received for them.</p>
+<body class="seller-page">
+<header class="seller-header">
+    <div class="seller-brand"><img th:src="@{/images/logo.jpg}" alt="SS Supermarket logo"><div><strong>SS Supermarket</strong><span>Seller Portal</span></div></div>
+    <div class="seller-header-actions"><a th:href="@{/products}" class="seller-header-icon" title="View storefront">&#127978;</a><button type="button" class="seller-header-icon" title="Help">&#10067;</button>
+        <div class="seller-profile-wrap"><button type="button" class="seller-profile-toggle" id="sellerProfileToggle" aria-expanded="false"><span>&#128100;</span><span th:text="${sellerName}">Seller</span><span>&#9662;</span></button>
+            <div class="seller-profile-menu" id="sellerProfileMenu" hidden><strong th:text="${sellerName}">Seller</strong><span>Seller Account</span><a href="#profile">&#128100; My Profile</a><a href="#settings">&#9881; Settings</a><a href="#password">&#128274; Change Password</a><form th:action="@{/logout}" method="post"><button type="submit">&#128682; Logout</button></form></div>
         </div>
     </div>
-</section>
-
-<div th:replace="~{fragments/layout :: footer}"></div>
-<script th:src="@{/js/main.js}"></script>
-
+</header>
+<div class="seller-shell"><aside class="seller-sidebar"><a class="seller-sidebar-active" href="#dashboard">&#8962; Dashboard</a><a href="#products">&#128230; Products</a><a href="#orders">&#128722; Orders</a><a href="#payments">&#128176; Payments</a><a href="#analytics">&#128202; Analytics</a><a href="#profile">&#128100; Profile</a><a href="#settings">&#9881; Settings</a><form th:action="@{/logout}" method="post" class="seller-sidebar-logout"><button type="submit">&#128682; Logout</button></form></aside>
+    <main class="seller-main" id="dashboard"><div class="seller-page-heading"><div><p class="eyebrow">Seller Dashboard</p><h1>Welcome back, <span th:text="${sellerName}">Seller</span>!</h1><p class="text-muted">Here's what's happening with your store today.</p></div><a th:href="@{/products}" class="btn btn-primary">View storefront</a></div>
+        <div class="seller-stat-grid"><div class="seller-stat-card"><span class="seller-stat-icon">&#128230;</span><span class="stat-label">Orders</span><strong th:text="${orderCount}">0</strong><small>Total orders</small></div><div class="seller-stat-card"><span class="seller-stat-icon">&#128176;</span><span class="stat-label">Revenue</span><strong>&#8377;<span th:text="${#numbers.formatDecimal(revenue, 1, 'COMMA', 2, 'POINT')}">0.00</span></strong><small>Total revenue</small></div><div class="seller-stat-card"><span class="seller-stat-icon">&#128717;</span><span class="stat-label">Products</span><strong th:text="${productCount}">0</strong><small>Listed products</small></div></div>
+        <section class="seller-section" id="orders"><div class="seller-section-heading"><h2>Recent Orders</h2><span>Orders containing your products</span></div><div class="table-wrap" th:if="${!recentOrders.isEmpty()}"><table class="seller-orders-table"><thead><tr><th>Order</th><th>Product</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead><tbody><tr th:each="order : ${recentOrders}"><td>#<span th:text="${order.id}">10245</span></td><td th:text="${order.items.isEmpty() ? 'Product' : order.items[0].productName}">Product</td><td>&#8377;<span th:text="${#numbers.formatDecimal(order.totalAmount, 1, 'COMMA', 2, 'POINT')}">599.00</span></td><td><span class="order-status" th:text="${order.status}">CONFIRMED</span></td><td th:text="${#temporals.format(order.createdAt, 'dd MMM yyyy')}">20 Sep 2026</td></tr></tbody></table></div><div class="seller-empty" th:if="${recentOrders.isEmpty()}">No orders for your products yet.</div></section>
+    </main></div>
+<script th:src="@{/js/main.js}"></script><script>initSellerProfileMenu();</script>
 </body>
 </html>

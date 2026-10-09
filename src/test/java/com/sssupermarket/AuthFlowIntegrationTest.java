@@ -15,6 +15,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
@@ -54,17 +55,42 @@ class AuthFlowIntegrationTest {
     }
 
     @Test
-    void publicPages_areAccessible() throws Exception {
+        void publicPages_requireLoginExceptRegistration() throws Exception {
+
         mockMvc.perform(get("/"))
-                .andExpect(status().isOk())
-                .andExpect(content().string(containsString("SS")));
+                                .andExpect(status().is3xxRedirection())
+                                .andExpect(redirectedUrl("/login"));
 
         mockMvc.perform(get("/products"))
-                .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Laptop")));
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("http://localhost/login"));
 
         mockMvc.perform(get("/register"))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void otpLogin_createsBuyerAndOpensProfile() throws Exception {
+        MvcResult otpResult = mockMvc.perform(post("/api/auth/otp/request")
+                        .contentType(APPLICATION_JSON)
+                        .content("{\"identifier\":\"otp-buyer@example.com\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.developmentOtp").isString())
+                .andReturn();
+
+        String response = otpResult.getResponse().getContentAsString();
+        String otp = response.replaceAll(".*\\\"developmentOtp\\\":\\\"([^\\\"]+)\\\".*", "$1");
+        MvcResult verifyResult = mockMvc.perform(post("/api/auth/otp/verify")
+                        .contentType(APPLICATION_JSON)
+                        .content("{\"identifier\":\"otp-buyer@example.com\",\"otp\":\"" + otp + "\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.role").value("BUYER"))
+                .andReturn();
+
+        MockHttpSession session = (MockHttpSession) verifyResult.getRequest().getSession(false);
+        mockMvc.perform(get("/profile").session(session))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("otp-buyer@example.com")));
     }
 
     @Test
@@ -90,6 +116,7 @@ class AuthFlowIntegrationTest {
         MvcResult result = mockMvc.perform(post("/register")
                         .param("name", "Integration Seller")
                         .param("email", "integration-seller@example.com")
+                        .param("phone", "9123456789")
                         .param("password", "password123")
                         .param("confirmPassword", "password123")
                         .param("role", "SELLER")
@@ -168,14 +195,12 @@ class AuthFlowIntegrationTest {
     }
 
     @Test
-    void apiProducts_arePublicJson() throws Exception {
+    void apiProducts_requireAuthentication() throws Exception {
         mockMvc.perform(get("/api/products"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(5));
+                .andExpect(status().isUnauthorized());
 
         mockMvc.perform(get("/api/products").param("search", "laptop"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].name").value("Laptop"));
+                .andExpect(status().isUnauthorized());
     }
 
     @Test

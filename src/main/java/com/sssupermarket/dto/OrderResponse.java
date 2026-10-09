@@ -2,6 +2,8 @@ package com.sssupermarket.dto;
 
 import com.sssupermarket.entity.Order;
 import com.sssupermarket.entity.OrderStatus;
+import com.sssupermarket.entity.PaymentMethod;
+import com.sssupermarket.entity.PaymentStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -15,6 +17,10 @@ public class OrderResponse {
     private OrderStatus status;
     private LocalDateTime createdAt;
     private List<OrderItemResponse> items = new ArrayList<>();
+    private PaymentMethod paymentMethod;
+    private PaymentStatus paymentStatus;
+    private String shippingFullName;
+    private String shippingAddress;
 
     public OrderResponse() {
     }
@@ -25,6 +31,13 @@ public class OrderResponse {
         response.setTotalAmount(order.getTotalAmount());
         response.setStatus(order.getStatus());
         response.setCreatedAt(order.getCreatedAt());
+        response.setPaymentMethod(order.getPaymentMethod());
+        response.setPaymentStatus(order.getPaymentStatus());
+        response.setShippingFullName(order.getShippingFullName());
+        if (order.getShippingAddressLine1() != null) {
+            response.setShippingAddress(order.getShippingAddressLine1() + ", " + order.getShippingCity() + ", "
+                + order.getShippingState() + " " + order.getShippingPincode());
+        }
         return response;
     }
 
@@ -67,4 +80,8 @@ public class OrderResponse {
     public void setItems(List<OrderItemResponse> items) {
         this.items = items;
     }
+    public PaymentMethod getPaymentMethod(){return paymentMethod;} public void setPaymentMethod(PaymentMethod v){paymentMethod=v;}
+    public PaymentStatus getPaymentStatus(){return paymentStatus;} public void setPaymentStatus(PaymentStatus v){paymentStatus=v;}
+    public String getShippingFullName(){return shippingFullName;} public void setShippingFullName(String v){shippingFullName=v;}
+    public String getShippingAddress(){return shippingAddress;} public void setShippingAddress(String v){shippingAddress=v;}
 }

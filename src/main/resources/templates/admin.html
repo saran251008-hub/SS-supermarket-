@@ -36,11 +36,33 @@
             <h3>User &amp; Order Management - Coming in Phase 2</h3>
             <p>In the next phase you will be able to view and manage users, orders and products from this dashboard.</p>
         </div>
+
+        <div class="form-card mt-2">
+            <h3>Category Management</h3>
+            <p class="text-muted">Create a top-level category or a nested subcategory.</p>
+            <form id="categoryCreateForm" class="form-row">
+                <div class="form-group"><label for="categoryName">Name</label><input id="categoryName" required></div>
+                <div class="form-group"><label for="categoryParent">Parent</label><select id="categoryParent"><option value="">Top-level category</option><option th:each="category : ${categoryOptions}" th:value="${category.id}" th:text="${category.name}">Books</option></select></div>
+                <div class="form-group"><button type="submit" class="btn btn-primary">Create Category</button></div>
+            </form>
+            <p id="categoryMessage" class="text-muted" aria-live="polite"></p>
+        </div>
     </div>
 </section>
 
 <div th:replace="~{fragments/layout :: footer}"></div>
 <script th:src="@{/js/main.js}"></script>
+<script>
+document.getElementById('categoryCreateForm').addEventListener('submit', function (event) {
+    event.preventDefault();
+    fetch('/api/categories', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({
+        name: document.getElementById('categoryName').value,
+        parentId: document.getElementById('categoryParent').value || null
+    })}).then(function (response) { return response.json().then(function (body) { if (!response.ok) throw new Error(body.message || 'Could not create category.'); return body; }); })
+      .then(function () { document.getElementById('categoryMessage').textContent = 'Category created. Refresh the Products page to see it.'; event.target.reset(); })
+      .catch(function (error) { document.getElementById('categoryMessage').textContent = error.message; });
+});
+</script>
 
 </body>
 </html>

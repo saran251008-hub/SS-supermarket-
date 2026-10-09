@@ -26,7 +26,7 @@
         <div class="grid" th:if="${!featuredProducts.isEmpty()}">
             <div class="card" th:each="product : ${featuredProducts}">
                 <div class="card-media">
-                    <img th:src="@{${product.imageUrl != null ? product.imageUrl : '/images/products/default.svg'}}"
+                    <img th:src="@{${product.imageUrl != null ? product.imageUrl : '/images/products/default.jpg'}}"
                          th:alt="${product.name}">
                 </div>
                 <div class="card-body">

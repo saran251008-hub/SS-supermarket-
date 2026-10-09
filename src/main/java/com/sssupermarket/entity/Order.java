@@ -41,6 +41,23 @@ public class Order {
     @Column(nullable = false, length = 20)
     private OrderStatus status;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_method", length = 20)
+    private PaymentMethod paymentMethod;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_status", length = 20)
+    private PaymentStatus paymentStatus;
+
+    @Column(name = "shipping_full_name", length = 100) private String shippingFullName;
+    @Column(name = "shipping_mobile", length = 10) private String shippingMobile;
+    @Column(name = "shipping_address_line1", length = 250) private String shippingAddressLine1;
+    @Column(name = "shipping_address_line2", length = 250) private String shippingAddressLine2;
+    @Column(name = "shipping_city", length = 100) private String shippingCity;
+    @Column(name = "shipping_state", length = 100) private String shippingState;
+    @Column(name = "shipping_pincode", length = 10) private String shippingPincode;
+    @Column(name = "shipping_country", length = 80) private String shippingCountry;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -93,6 +110,27 @@ public class Order {
     public void setStatus(OrderStatus status) {
         this.status = status;
     }
+
+    public PaymentMethod getPaymentMethod() { return paymentMethod; }
+    public void setPaymentMethod(PaymentMethod v) { paymentMethod = v; }
+    public PaymentStatus getPaymentStatus() { return paymentStatus; }
+    public void setPaymentStatus(PaymentStatus v) { paymentStatus = v; }
+    public String getShippingFullName() { return shippingFullName; }
+    public void setShippingFullName(String v) { shippingFullName = v; }
+    public String getShippingMobile() { return shippingMobile; }
+    public void setShippingMobile(String v) { shippingMobile = v; }
+    public String getShippingAddressLine1() { return shippingAddressLine1; }
+    public void setShippingAddressLine1(String v) { shippingAddressLine1 = v; }
+    public String getShippingAddressLine2() { return shippingAddressLine2; }
+    public void setShippingAddressLine2(String v) { shippingAddressLine2 = v; }
+    public String getShippingCity() { return shippingCity; }
+    public void setShippingCity(String v) { shippingCity = v; }
+    public String getShippingState() { return shippingState; }
+    public void setShippingState(String v) { shippingState = v; }
+    public String getShippingPincode() { return shippingPincode; }
+    public void setShippingPincode(String v) { shippingPincode = v; }
+    public String getShippingCountry() { return shippingCountry; }
+    public void setShippingCountry(String v) { shippingCountry = v; }
 
     public LocalDateTime getCreatedAt() {
         return createdAt;

@@ -3,6 +3,7 @@ package com.sssupermarket.controller;
 import com.sssupermarket.service.OrderService;
 import com.sssupermarket.service.ProductService;
 import com.sssupermarket.service.UserService;
+import com.sssupermarket.service.CategoryService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,11 +18,14 @@ public class AdminController {
     private final UserService userService;
     private final ProductService productService;
     private final OrderService orderService;
+    private final CategoryService categoryService;
 
-    public AdminController(UserService userService, ProductService productService, OrderService orderService) {
+    public AdminController(UserService userService, ProductService productService, OrderService orderService,
+                           CategoryService categoryService) {
         this.userService = userService;
         this.productService = productService;
         this.orderService = orderService;
+        this.categoryService = categoryService;
     }
 
     @GetMapping
@@ -30,6 +34,7 @@ public class AdminController {
         model.addAttribute("totalProducts", productService.countProducts());
         model.addAttribute("totalOrders", orderService.countOrders());
         model.addAttribute("totalRevenue", orderService.getTotalRevenue());
+        model.addAttribute("categoryOptions", categoryService.flatTree());
         return "admin";
     }
 }

@@ -82,7 +82,32 @@ Open http://localhost:8080
 
 > **Note for local testing without MySQL:** `mvn spring-boot:run -Dspring-boot.run.profiles=test -Dspring-boot.run.useTestClasspath=true` runs against in-memory H2.
 
-## 7. Default Admin Credentials
+## 7. Deploying to Render with Docker
+
+Render can build this project from the included `Dockerfile`. Create a **Web Service**, connect the repository, select **Docker** as the runtime, and set the root directory to `SSSupermarket` if the repository root is its parent. If `SSSupermarket` is already the repository root, leave the root directory blank.
+
+The application requires an external MySQL-compatible database; the database must allow connections from Render. Set these environment variables in the Render service:
+
+| Variable | Value |
+|----------|-------|
+| `DB_URL` | Full JDBC URL, for example `jdbc:mysql://DB_HOST:3306/DB_NAME?useSSL=true&serverTimezone=UTC` |
+| `DB_USERNAME` | Database username |
+| `DB_PASSWORD` | Database password |
+
+Render supplies `PORT` automatically, and the application listens on that port. Do not use `localhost` in `DB_URL` for a hosted database. Keep database credentials in Render's environment settings, not in source control. The schema is updated by Hibernate on startup (`spring.jpa.hibernate.ddl-auto=update`); use a persistent production database and back it up independently.
+
+To build and run the same image locally:
+
+```bash
+docker build -t sssupermarket .
+docker run --rm -p 8080:8080 \
+  -e DB_URL="jdbc:mysql://host.docker.internal:3306/SSSupermarket?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC" \
+  -e DB_USERNAME=root \
+  -e DB_PASSWORD=your-password \
+  sssupermarket
+```
+
+## 8. Default Admin Credentials
 
 Created automatically the first time the application starts (stored only as a BCrypt hash):
 
@@ -105,7 +130,7 @@ Option 2: an admin user-management UI is planned for Phase 2.
 
 > The seed in `DataInitializer` only runs when the admin account does **not** exist, so editing it will not change an existing account.
 
-## 8. Roles & Access
+## 9. Roles & Access
 
 | URL / API            | Allowed                                             |
 |----------------------|-----------------------------------------------------|
@@ -117,7 +142,7 @@ Option 2: an admin user-management UI is planned for Phase 2.
 
 After login: BUYER → `/products`, SELLER → `/seller`, ADMIN → `/admin`.
 
-## 9. API Endpoints
+## 10. API Endpoints
 
 | Method | Endpoint                 | Description                          | Auth       |
 |--------|--------------------------|--------------------------------------|------------|
@@ -135,7 +160,7 @@ After login: BUYER → `/products`, SELLER → `/seller`, ADMIN → `/admin`.
 | GET    | `/api/orders`            | My orders                            | BUYER      |
 | GET    | `/api/orders/{id}`       | Order details (own only)             | BUYER      |
 
-## 10. Project Structure
+## 11. Project Structure
 
 ```
 SSSupermarket/
@@ -161,7 +186,7 @@ SSSupermarket/
     └── test/java/com/sssupermarket/   Service + integration tests
 ```
 
-## 11. Future Development (Phase 2+)
+## 12. Future Development (Phase 2+)
 
 - **Seller:** product management (add / edit / delete), seller order dashboard
 - **Admin:** user management, order management, product moderation

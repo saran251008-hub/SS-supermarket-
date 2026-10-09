@@ -28,7 +28,7 @@
                 <tr th:each="item : ${cart.items}">
                     <td>
                         <div style="display:flex; align-items:center; gap:12px">
-                            <img th:src="@{${item.imageUrl != null ? item.imageUrl : '/images/products/default.svg'}}"
+                            <img th:src="@{${item.imageUrl != null ? item.imageUrl : '/images/products/default.jpg'}}"
                                  th:alt="${item.productName}" style="width:56px; height:44px; object-fit:contain">
                             <div>
                                 <a th:href="@{/products/{id}(id=${item.productId})}" th:text="${item.productName}">Laptop</a>

@@ -15,6 +15,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class AuthController {
@@ -51,7 +52,10 @@ public class AuthController {
     }
 
     @GetMapping("/login")
-    public String showLoginForm() {
+    public String showLoginForm(@RequestParam(required = false) String role, Model model) {
+        if ("BUYER".equalsIgnoreCase(role) || "SELLER".equalsIgnoreCase(role)) {
+            model.addAttribute("selectedRole", role.toUpperCase());
+        }
         return "login";
     }
 

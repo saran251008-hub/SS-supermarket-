@@ -21,6 +21,8 @@
                     <th>Date</th>
                     <th>Total</th>
                     <th>Status</th>
+                    <th>Payment</th>
+                    <th>Delivery</th>
                     <th>Actions</th>
                 </tr>
                 </thead>
@@ -30,6 +32,8 @@
                     <td th:text="${#temporals.format(order.createdAt, 'dd MMM yyyy, hh:mm a')}">11 Aug 2026</td>
                     <td>&#8377;<span th:text="${#numbers.formatDecimal(order.totalAmount, 1, 'COMMA', 2, 'POINT')}">45000.00</span></td>
                     <td><span class="tag" th:text="${order.status}">CONFIRMED</span></td>
+                    <td th:text="${order.paymentMethod != null ? order.paymentMethod + ' / ' + order.paymentStatus : 'Legacy order'}">COD / PENDING</td>
+                    <td th:text="${order.shippingAddress}">Address</td>
                     <td>
                         <a th:href="@{/orders/{id}(id=${order.id})}" class="btn btn-outline btn-sm">View Details</a>
                     </td>

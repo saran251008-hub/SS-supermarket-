@@ -1,9 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240">
-  <rect width="320" height="240" fill="#fefce8"/>
-  <path d="M160 150c-34 0-56-14-56-38 0-16 10-24 22-20 14 5 16 26 34 26s20-21 34-26c12-4 22 4 22 20 0 24-22 38-56 38z" fill="#0f172a"/>
-  <path d="M160 150c-34 0-56-14-56-38 0-16 10-24 22-20 14 5 16 26 34 26s20-21 34-26c12-4 22 4 22 20 0 24-22 38-56 38z" fill="none" stroke="#0f172a" stroke-width="0"/>
-  <rect x="152" y="40" width="16" height="20" rx="8" fill="#334155"/>
-  <circle cx="160" cy="122" r="14" fill="#16a34a"/>
-  <path d="M126 140a58 58 0 0 0 68 0" fill="none" stroke="#0f172a" stroke-width="6" stroke-linecap="round"/>
-  <text x="160" y="212" text-anchor="middle" font-family="Segoe UI, Arial" font-size="20" font-weight="700" fill="#1f2937">Headphones</text>
-</svg>

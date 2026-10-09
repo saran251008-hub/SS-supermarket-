@@ -15,6 +15,18 @@
 
         <div th:if="${cart != null and !cart.isEmpty()}" style="display:grid; gap:28px; grid-template-columns: 1fr 340px; align-items:start">
             <div class="table-wrap">
+                <h3 class="mb-1">1. Delivery Address</h3>
+                <form th:action="@{/checkout/address}" method="post" style="padding:16px; border:1px solid var(--border); margin-bottom:18px">
+                    <div class="form-row"><div class="form-group"><label>Full name</label><input name="fullName" required></div><div class="form-group"><label>Mobile</label><input name="mobileNumber" pattern="[0-9]{10}" maxlength="10" required></div></div>
+                    <div class="form-group"><label>Address line 1</label><input name="addressLine1" required></div>
+                    <div class="form-group"><label>Address line 2</label><input name="addressLine2"></div>
+                    <div class="form-row"><div class="form-group"><label>City</label><input name="city" required></div><div class="form-group"><label>State</label><input name="state" required></div><div class="form-group"><label>Pincode</label><input name="pincode" pattern="[0-9]{5,10}" required></div></div>
+                    <div class="form-group"><label>Country</label><input name="country" value="India" required></div>
+                    <button type="submit" class="btn btn-outline">Save Address</button>
+                </form>
+                <form th:action="@{/checkout/confirm}" method="post">
+                <div class="form-group"><label for="addressId">Saved address</label><select id="addressId" name="addressId" required><option value="">Select an address</option><option th:each="address : ${addresses}" th:value="${address.id}" th:selected="${selectedAddressId == address.id}" th:text="${address.fullName + ' - ' + address.addressLine1 + ', ' + address.city}">Saran - Street, City</option></select></div>
+                <h3 class="mb-1">2. Order Summary</h3>
                 <table>
                     <thead>
                     <tr>
@@ -33,6 +45,10 @@
                     </tr>
                     </tbody>
                 </table>
+                <h3 class="mt-2 mb-1">3. Payment Method</h3>
+                <div class="form-group"><label><input type="radio" name="paymentMethod" value="COD" required> Cash on Delivery</label><label><input type="radio" name="paymentMethod" value="ONLINE"> Online Payment (mock)</label></div>
+                <button type="submit" class="btn btn-primary">Place Order</button>
+                </form>
             </div>
 
             <div class="summary">
@@ -58,9 +74,7 @@
                     This is a demo checkout. No real payment is processed.
                 </p>
 
-                <form th:action="@{/checkout/confirm}" method="post" class="mt-2">
-                    <button type="submit" class="btn btn-primary btn-block">Confirm Order</button>
-                </form>
+                <p class="text-muted mt-1" style="font-size:0.85rem">Your total is calculated securely on the server.</p>
             </div>
         </div>
 
