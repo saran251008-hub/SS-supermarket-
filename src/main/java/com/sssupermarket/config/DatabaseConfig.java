@@ -32,25 +32,37 @@ public class DatabaseConfig {
 
         DbParams params = resolveConnection(rawUrl, username, password);
 
-        log.info("Initializing DataSource with URL: {}", sanitizeUrl(params.jdbcUrl));
-        HikariConfig config = new HikariConfig();
-        config.setJdbcUrl(params.jdbcUrl);
-        if (params.username != null) {
-            config.setUsername(params.username);
-        }
-        if (params.password != null) {
-            config.setPassword(params.password);
-        }
-        if (params.driverClassName != null) {
-            config.setDriverClassName(params.driverClassName);
-        }
-        config.setMaximumPoolSize(10);
-        config.setMinimumIdle(2);
-        config.setConnectionTimeout(30000);
-        config.setIdleTimeout(600000);
-        config.setMaxLifetime(1800000);
+        try {
+            log.info("Initializing DataSource with URL: {}", sanitizeUrl(params.jdbcUrl));
+            HikariConfig config = new HikariConfig();
+            config.setJdbcUrl(params.jdbcUrl);
+            if (params.username != null) {
+                config.setUsername(params.username);
+            }
+            if (params.password != null) {
+                config.setPassword(params.password);
+            }
+            if (params.driverClassName != null) {
+                config.setDriverClassName(params.driverClassName);
+            }
+            config.setMaximumPoolSize(10);
+            config.setMinimumIdle(2);
+            config.setConnectionTimeout(8000);
+            config.setIdleTimeout(600000);
+            config.setMaxLifetime(1800000);
 
-        return new HikariDataSource(config);
+            return new HikariDataSource(config);
+        } catch (Exception e) {
+            log.error("Primary DataSource failed to connect ({}): {}. Falling back to in-memory database to ensure 100% web service uptime.",
+                    sanitizeUrl(params.jdbcUrl), e.getMessage());
+            DbParams fallback = fallbackH2("Primary database connection error: " + e.getMessage());
+            HikariConfig fbConfig = new HikariConfig();
+            fbConfig.setJdbcUrl(fallback.jdbcUrl);
+            fbConfig.setUsername(fallback.username);
+            fbConfig.setPassword(fallback.password);
+            fbConfig.setDriverClassName(fallback.driverClassName);
+            return new HikariDataSource(fbConfig);
+        }
     }
 
     private DbParams resolveConnection(String rawUrl, String defaultUser, String defaultPass) {
@@ -96,18 +108,26 @@ public class DatabaseConfig {
                 } catch (Exception ignored) {}
             }
 
-            if (host.contains("dpg-") && System.getenv("RENDER") == null && !isPortReachable(host, port, 800)) {
-                log.info("Detected Render internal PostgreSQL host outside of Render cloud. Checking local MySQL at localhost:3306...");
-                if (isPortReachable("localhost", 3306, 600)) {
-                    log.info("Connecting to local MySQL at localhost:3306...");
-                    return new DbParams(
-                            "jdbc:mysql://localhost:3306/sssupermarket?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC",
-                            defaultUser != null && !defaultUser.isBlank() ? defaultUser : "root",
-                            defaultPass != null && !defaultPass.isBlank() ? defaultPass : "root",
-                            "com.mysql.cj.jdbc.Driver"
-                    );
+            if (host.contains("dpg-")) {
+                boolean onRender = System.getenv("RENDER") != null;
+                boolean reachable = isPortReachable(host, port, 1200);
+                if (!reachable) {
+                    if (onRender) {
+                        log.warn("Render PostgreSQL host {} is not reachable within timeout. Falling back so web service stays live...", host);
+                    } else {
+                        log.info("Detected Render internal PostgreSQL host outside of Render cloud. Checking local MySQL at localhost:3306...");
+                    }
+                    if (isPortReachable("localhost", 3306, 500)) {
+                        log.info("Connecting to local MySQL at localhost:3306...");
+                        return new DbParams(
+                                "jdbc:mysql://localhost:3306/sssupermarket?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC",
+                                defaultUser != null && !defaultUser.isBlank() ? defaultUser : "root",
+                                defaultPass != null && !defaultPass.isBlank() ? defaultPass : "root",
+                                "com.mysql.cj.jdbc.Driver"
+                        );
+                    }
+                    return fallbackH2("Render PostgreSQL host " + host + " is not reachable");
                 }
-                return fallbackH2("Render internal PostgreSQL host is only accessible inside Render cloud network");
             }
 
             String jdbcUrl = "jdbc:postgresql://" + host + ":" + port + path;
