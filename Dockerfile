@@ -15,4 +15,5 @@ COPY --from=build /workspace/target/sssupermarket-1.0.0.jar app.jar
 
 USER spring:spring
 EXPOSE 8080
+ENV DATABASE_URL="postgresql://sssupermarket_user:ZONIw9OfEaPtLADMbPlP7d0JwrINqF3Y@dpg-db4tucg473hc73954ai0-a/sssupermarket"
 ENTRYPOINT ["java", "-XX:MaxRAMPercentage=75.0", "-jar", "/app/app.jar"]

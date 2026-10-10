@@ -14,6 +14,8 @@ import javax.sql.DataSource;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.URI;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Configuration
 @Profile("!test")
@@ -60,29 +62,46 @@ public class DatabaseConfig {
 
         // Render / Cloud PostgreSQL format: postgres://user:pass@host:port/dbname
         if (trimmed.startsWith("postgres://") || trimmed.startsWith("postgresql://")) {
-            try {
-                URI uri = new URI(trimmed);
-                String host = uri.getHost();
-                int port = uri.getPort() > 0 ? uri.getPort() : 5432;
-                String path = uri.getPath() != null ? uri.getPath() : "/sssupermarket";
-                String u = defaultUser;
-                String p = defaultPass;
-                String userInfo = uri.getUserInfo();
-                if (userInfo != null && !userInfo.isBlank()) {
-                    String[] parts = userInfo.split(":", 2);
-                    u = parts[0];
-                    p = parts.length > 1 ? parts[1] : "";
+            String u = defaultUser;
+            String p = defaultPass;
+            String host = "localhost";
+            int port = 5432;
+            String path = "/sssupermarket";
+            String query = null;
+
+            Pattern pattern = Pattern.compile("^(?:postgres(?:ql)?):\\/\\/(?:([^:@]+)(?::([^@]*))?@)?([^\\/:]+)(?::(\\d+))?(\\/[^?]*)?(?:\\?(.*))?$");
+            Matcher m = pattern.matcher(trimmed);
+            if (m.matches()) {
+                if (m.group(1) != null && !m.group(1).isBlank()) u = m.group(1);
+                if (m.group(2) != null && !m.group(2).isBlank()) p = m.group(2);
+                if (m.group(3) != null && !m.group(3).isBlank()) host = m.group(3);
+                if (m.group(4) != null && !m.group(4).isBlank()) {
+                    try { port = Integer.parseInt(m.group(4)); } catch (NumberFormatException ignored) {}
                 }
-                String jdbcUrl = "jdbc:postgresql://" + host + ":" + port + path;
-                String query = uri.getQuery();
-                if (query != null && !query.isBlank()) {
-                    jdbcUrl += "?" + query;
-                }
-                log.info("Detected PostgreSQL URL from environment.");
-                return new DbParams(jdbcUrl, u, p, "org.postgresql.Driver");
-            } catch (Exception e) {
-                log.warn("Could not parse PostgreSQL URI, attempting direct connection: {}", e.getMessage());
+                if (m.group(5) != null && !m.group(5).isBlank()) path = m.group(5);
+                if (m.group(6) != null && !m.group(6).isBlank()) query = m.group(6);
+            } else {
+                try {
+                    URI uri = new URI(trimmed);
+                    if (uri.getHost() != null) host = uri.getHost();
+                    if (uri.getPort() > 0) port = uri.getPort();
+                    if (uri.getPath() != null) path = uri.getPath();
+                    String userInfo = uri.getUserInfo();
+                    if (userInfo != null && !userInfo.isBlank()) {
+                        String[] parts = userInfo.split(":", 2);
+                        u = parts[0];
+                        if (parts.length > 1) p = parts[1];
+                    }
+                    query = uri.getQuery();
+                } catch (Exception ignored) {}
             }
+
+            String jdbcUrl = "jdbc:postgresql://" + host + ":" + port + path;
+            if (query != null && !query.isBlank()) {
+                jdbcUrl += "?" + query;
+            }
+            log.info("Detected PostgreSQL URL from environment. Configured JDBC URL: {}", sanitizeUrl(jdbcUrl));
+            return new DbParams(jdbcUrl, u, p, "org.postgresql.Driver");
         }
 
         // MySQL URI format: mysql://user:pass@host:port/dbname
