@@ -98,7 +98,140 @@ function initLoginPage() {
   });
 }
 
+/* ---------- Dark / Light Mode ---------- */
+function toggleTheme() {
+  var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  if (isDark) {
+    document.documentElement.removeAttribute('data-theme');
+    localStorage.setItem('ss_theme', 'light');
+  } else {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    localStorage.setItem('ss_theme', 'dark');
+  }
+  updateThemeIcons();
+}
+
+function updateThemeIcons() {
+  var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  document.querySelectorAll('.theme-toggle-btn, .themeToggleBtn, #themeToggleBtn, #sellerThemeToggleBtn').forEach(function (btn) {
+    var icon = btn.querySelector('.theme-icon, .theme-toggle-icon');
+    if (icon) {
+      icon.innerHTML = isDark ? '&#9728;' : '&#9790;';
+    }
+  });
+}
+
+/* ---------- Password Visibility Toggle ---------- */
+function togglePasswordVisibility(inputId, btn) {
+  var input = document.getElementById(inputId);
+  if (!input) return;
+  if (input.type === 'password') {
+    input.type = 'text';
+    btn.innerHTML = '&#128064;';
+    btn.setAttribute('aria-label', 'Hide password');
+    btn.setAttribute('title', 'Hide password');
+  } else {
+    input.type = 'password';
+    btn.innerHTML = '&#128065;';
+    btn.setAttribute('aria-label', 'Show password');
+    btn.setAttribute('title', 'Show password');
+  }
+}
+
+/* ---------- AI Chatbot Assistant ---------- */
+function toggleAiChat() {
+  var win = document.getElementById('aiChatWindow');
+  if (!win) return;
+  var isHidden = win.style.display === 'none' || win.style.display === '';
+  if (isHidden) {
+    win.style.display = 'flex';
+    win.setAttribute('aria-hidden', 'false');
+    var input = document.getElementById('aiChatInput');
+    if (input) input.focus();
+  } else {
+    win.style.display = 'none';
+    win.setAttribute('aria-hidden', 'true');
+  }
+}
+
+function sendAiPrompt(promptText) {
+  var input = document.getElementById('aiChatInput');
+  if (input) {
+    input.value = promptText;
+  }
+  handleAiSubmit();
+}
+
+function handleAiSubmit(e) {
+  if (e && e.preventDefault) e.preventDefault();
+  var input = document.getElementById('aiChatInput');
+  if (!input) return;
+  var message = input.value.trim();
+  if (!message) return;
+
+  appendAiMessage('user', message, false);
+  input.value = '';
+
+  var productId = null;
+  var urlMatch = window.location.pathname.match(/\/products\/(\d+)/);
+  if (urlMatch) {
+    productId = parseInt(urlMatch[1], 10);
+  }
+
+  var loadingMsg = appendAiMessage('bot', 'Thinking...', false);
+
+  fetch('/api/ai/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message: message, productId: productId })
+  })
+    .then(function (res) {
+      if (!res.ok) throw new Error('AI service response error');
+      return res.json();
+    })
+    .then(function (data) {
+      if (loadingMsg) loadingMsg.remove();
+      var formatted = formatAiMarkdown(data.reply);
+      appendAiMessage('bot', formatted, true);
+    })
+    .catch(function () {
+      if (loadingMsg) loadingMsg.remove();
+      appendAiMessage('bot', 'Sorry, I had trouble answering that. Please try asking again!', false);
+    });
+}
+
+function appendAiMessage(sender, text, isHtml) {
+  var container = document.getElementById('aiChatMessages');
+  if (!container) return null;
+  var msg = document.createElement('div');
+  msg.className = 'ai-message ' + sender;
+  var bubble = document.createElement('div');
+  bubble.className = 'ai-msg-bubble';
+  if (isHtml) {
+    bubble.innerHTML = text;
+  } else {
+    bubble.textContent = text;
+  }
+  msg.appendChild(bubble);
+  container.appendChild(msg);
+  container.scrollTop = container.scrollHeight;
+  return msg;
+}
+
+function formatAiMarkdown(text) {
+  if (!text) return '';
+  var escaped = text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+  return escaped
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+    .replace(/\n/g, '<br>');
+}
+
 document.addEventListener("DOMContentLoaded", function () {
+  updateThemeIcons();
   initLoginPage();
   var qtyInput = document.getElementById("qtyInput");
   if (qtyInput) {
@@ -116,3 +249,4 @@ document.addEventListener("DOMContentLoaded", function () {
     }, 4500);
   });
 });
+

@@ -12,6 +12,9 @@
         </div>
     </div>
     <div class="seller-header-actions">
+        <button type="button" class="theme-toggle-btn" id="sellerThemeToggleBtn" onclick="toggleTheme()" aria-label="Toggle dark/light mode" title="Switch Theme">
+            <span class="theme-toggle-icon">&#127769;</span>
+        </button>
         <a th:href="@{/products}" class="btn btn-outline btn-sm" title="View storefront">&#127978; View Storefront</a>
         <div class="seller-profile-wrap">
             <button type="button" class="seller-profile-toggle" id="sellerProfileToggle" aria-expanded="false">
@@ -73,7 +76,7 @@
             <div class="seller-stat-card">
                 <span class="seller-stat-icon">&#128176;</span>
                 <span class="stat-label">Revenue</span>
-                <strong>&#8377;<span th:text="${#numbers.formatDecimal(revenue, 1, 'COMMA', 2, 'POINT')}">0.00</span></strong>
+                <strong>&#8377;<span th:text="${#numbers.formatDecimal(revenue != null ? revenue : 0, 1, 'COMMA', 2, 'POINT')}">0.00</span></strong>
                 <small>Gross sales revenue</small>
             </div>
         </div>
@@ -179,8 +182,14 @@
                         </td>
                         <td>
                             <div style="display:flex; gap:6px;">
-                                <button type="button" class="btn btn-outline btn-sm"
-                                        th:onclick="'openEditModal(' + ${p.id} + ', ' + ${#strings.escapeJavaScript(p.name)} + ', ' + ${#strings.escapeJavaScript(p.brand != null ? p.brand : '')} + ', ' + ${p.price} + ', ' + ${p.stock} + ', ' + ${#strings.escapeJavaScript(p.imageUrl != null ? p.imageUrl : '')} + ', ' + ${#strings.escapeJavaScript(p.description != null ? p.description : '')} + ')'">
+                                <button type="button" class="btn btn-outline btn-sm edit-product-btn"
+                                        th:data-id="${p.id}"
+                                        th:data-name="${p.name}"
+                                        th:data-brand="${p.brand != null ? p.brand : ''}"
+                                        th:data-price="${p.price}"
+                                        th:data-stock="${p.stock}"
+                                        th:data-image="${p.imageUrl != null ? p.imageUrl : ''}"
+                                        th:data-desc="${p.description != null ? p.description : ''}">
                                     Edit
                                 </button>
                                 <form th:action="@{/seller/products/{id}/delete(id=${p.id})}" method="post" onsubmit="return confirm('Are you sure you want to delete or deactivate this product?');">
@@ -327,6 +336,22 @@
     function closeEditModal() {
         document.getElementById('editProductModal').style.display = 'none';
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.edit-product-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                openEditModal(
+                    btn.getAttribute('data-id'),
+                    btn.getAttribute('data-name'),
+                    btn.getAttribute('data-brand'),
+                    btn.getAttribute('data-price'),
+                    btn.getAttribute('data-stock'),
+                    btn.getAttribute('data-image'),
+                    btn.getAttribute('data-desc')
+                );
+            });
+        });
+    });
 </script>
 </body>
 </html>

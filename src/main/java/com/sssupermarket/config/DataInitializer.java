@@ -114,13 +114,23 @@ public class DataInitializer {
             log.info("Seeded {} new products. Total catalog size: {}", newlyAdded, productRepository.count());
         }
 
-        // Ensure all products have a seller ID
-        productRepository.findAll().stream()
-                .filter(product -> product.getSellerId() == null)
-                .forEach(product -> {
-                    product.setSellerId(sellerId);
-                    productRepository.save(product);
-                });
+        // Ensure all products have a seller ID and realistic ratings
+        for (Product product : productRepository.findAll()) {
+            boolean updated = false;
+            if (product.getSellerId() == null) {
+                product.setSellerId(sellerId);
+                updated = true;
+            }
+            if (product.getRating() == null || product.getRating() < 1.0) {
+                double r = 4.1 + (Math.abs(product.getName().hashCode()) % 9) * 0.1;
+                product.setRating(Math.round(r * 10.0) / 10.0);
+                product.setReviewCount(15 + (Math.abs(product.getName().hashCode()) % 150));
+                updated = true;
+            }
+            if (updated) {
+                productRepository.save(product);
+            }
+        }
     }
 
     private void seedCategories(CategoryRepository repository, ProductRepository productRepository) {

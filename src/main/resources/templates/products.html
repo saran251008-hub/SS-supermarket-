@@ -57,6 +57,12 @@
                     <h3>
                         <a th:href="@{/products/{id}(id=${product.id})}" th:text="${product.name}">Laptop</a>
                     </h3>
+                    <div class="product-rating">
+                        <span class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+                        <span class="rating-value" th:text="${product.rating != null ? #numbers.formatDecimal(product.rating, 1, 'POINT', 1, 'POINT') : '4.5'}">4.5</span>
+                        <span class="rating-max">/5</span>
+                        <span class="rating-count" th:text="'(' + ${product.reviewCount != null ? product.reviewCount : 25} + ')'">(25)</span>
+                    </div>
                     <div class="card-meta">
                         <span class="price">&#8377;<span th:text="${#numbers.formatDecimal(product.price, 1, 'COMMA', 2, 'POINT')}">45000.00</span></span>
                         <span th:if="${product.stock > 0}" class="stock-info"

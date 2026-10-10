@@ -51,6 +51,12 @@ public class Product {
     @Column(name = "seller_id")
     private Long sellerId;
 
+    @Column(name = "rating")
+    private Double rating = 4.5;
+
+    @Column(name = "review_count")
+    private Integer reviewCount = 25;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -86,6 +92,13 @@ public class Product {
                    String imageUrl, Integer stock, Long sellerId, String brand) {
         this(name, description, price, category, imageUrl, stock, sellerId);
         this.brand = brand;
+    }
+
+    public Product(String name, String description, BigDecimal price, String category,
+                   String imageUrl, Integer stock, Long sellerId, String brand, Double rating, Integer reviewCount) {
+        this(name, description, price, category, imageUrl, stock, sellerId, brand);
+        this.rating = rating;
+        this.reviewCount = reviewCount;
     }
 
     public Long getId() {
@@ -166,6 +179,22 @@ public class Product {
 
     public void setSellerId(Long sellerId) {
         this.sellerId = sellerId;
+    }
+
+    public Double getRating() {
+        return rating != null ? rating : 4.5;
+    }
+
+    public void setRating(Double rating) {
+        this.rating = rating;
+    }
+
+    public Integer getReviewCount() {
+        return reviewCount != null ? reviewCount : 25;
+    }
+
+    public void setReviewCount(Integer reviewCount) {
+        this.reviewCount = reviewCount;
     }
 
     public LocalDateTime getCreatedAt() {

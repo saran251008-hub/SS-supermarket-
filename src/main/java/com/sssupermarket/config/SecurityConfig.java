@@ -25,7 +25,7 @@ public class SecurityConfig {
                                                    RestAccessDeniedHandler restAccessDeniedHandler) throws Exception {
         http
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/register", "/login", "/css/**", "/js/**", "/images/**", "/error/**", "/favicon.ico").permitAll()
+                .requestMatchers("/", "/register", "/login", "/css/**", "/js/**", "/images/**", "/error/**", "/favicon.ico", "/api/ai/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/products", "/products/**").authenticated()
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/categories/**").authenticated()

@@ -19,6 +19,8 @@ public class ProductResponse {
     private Long sellerId;
     private String sellerName;
     private String sellerPhone;
+    private Double rating;
+    private Integer reviewCount;
 
     public ProductResponse() {
     }
@@ -42,6 +44,8 @@ public class ProductResponse {
         response.setImageUrl(product.getImageUrl());
         response.setStock(product.getStock());
         response.setSellerId(product.getSellerId());
+        response.setRating(product.getRating() != null ? product.getRating() : 4.5);
+        response.setReviewCount(product.getReviewCount() != null ? product.getReviewCount() : 25);
         return response;
     }
 
@@ -131,5 +135,21 @@ public class ProductResponse {
 
     public void setSellerPhone(String sellerPhone) {
         this.sellerPhone = sellerPhone;
+    }
+
+    public Double getRating() {
+        return rating != null ? rating : 4.5;
+    }
+
+    public void setRating(Double rating) {
+        this.rating = rating;
+    }
+
+    public Integer getReviewCount() {
+        return reviewCount != null ? reviewCount : 25;
+    }
+
+    public void setReviewCount(Integer reviewCount) {
+        this.reviewCount = reviewCount;
     }
 }

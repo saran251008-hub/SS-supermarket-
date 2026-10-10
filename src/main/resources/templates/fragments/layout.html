@@ -5,6 +5,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="${title}">SS Supermarket</title>
+    <script>
+        (function() {
+            try {
+                var saved = localStorage.getItem('ss_theme');
+                if (saved === 'dark' || (!saved && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                } else {
+                    document.documentElement.removeAttribute('data-theme');
+                }
+            } catch(e) {}
+        })();
+    </script>
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 
@@ -16,7 +28,12 @@
             <img th:src="@{/images/logo.jpg}" alt="SS Supermarket logo">
             <span>SS <em>Supermarket</em></span>
         </a>
-        <button class="nav-toggle" onclick="toggleNav()" aria-label="Toggle navigation">&#9776;</button>
+        <div style="display:flex; align-items:center; gap:12px;">
+            <button type="button" class="theme-toggle-btn themeToggleBtn" onclick="toggleTheme()" aria-label="Toggle dark mode" title="Switch light/dark mode">
+                <span class="theme-icon">&#9790;</span>
+            </button>
+            <button class="nav-toggle" onclick="toggleNav()" aria-label="Toggle navigation">&#9776;</button>
+        </div>
         <ul class="nav-links" id="navLinks">
             <li><a th:href="@{/}">Home</a></li>
             <li><a th:href="@{/products}">Products</a></li>
@@ -52,14 +69,14 @@
     <div class="container footer-grid">
         <div>
             <h4>SS Supermarket</h4>
-            <p>Your one-stop online store for electronics and everyday essentials.</p>
+            <p>Your one-stop online store for fresh food, groceries, electronics and everyday essentials.</p>
         </div>
         <div>
             <h4>Shop</h4>
             <a th:href="@{/products}">All Products</a>
             <a th:href="@{/products(category='Electronics')}">Electronics</a>
-            <a th:href="@{/products(category='Accessories')}">Accessories</a>
-            <a th:href="@{/products(category='Wearables')}">Wearables</a>
+            <a th:href="@{/products(category='Dairy & Bakery')}">Dairy & Bakery</a>
+            <a th:href="@{/products(category='Fresh Fruits')}">Fresh Fruits</a>
         </div>
         <div>
             <h4>Account</h4>
@@ -71,7 +88,50 @@
     <div class="footer-bottom">
         &copy; <span th:text="${#temporals.format(#temporals.createNow(), 'yyyy')}">2026</span> SS Supermarket. All rights reserved.
     </div>
+
+    <!-- AI Chatbot Floating Component -->
+    <div th:replace="~{fragments/layout :: aiChatbot}"></div>
 </footer>
+
+<div th:fragment="aiChatbot">
+    <button type="button" id="aiChatToggle" class="ai-chat-btn" onclick="toggleAiChat()" aria-label="Open AI Supermarket Assistant" title="Ask AI Assistant">
+        <span class="ai-icon">&#129302;</span>
+        <span>Ask AI</span>
+    </button>
+
+    <div id="aiChatWindow" class="ai-chat-window" aria-hidden="true">
+        <div class="ai-chat-header">
+            <div class="ai-chat-header-info">
+                <div class="ai-chat-avatar">&#129302;</div>
+                <div class="ai-chat-title">
+                    <h4>SS Supermarket AI</h4>
+                    <span><span class="ai-status-dot"></span> Online &bull; Instant Guide</span>
+                </div>
+            </div>
+            <button type="button" class="ai-chat-close" onclick="toggleAiChat()" aria-label="Close AI Chat">&times;</button>
+        </div>
+
+        <div id="aiChatMessages" class="ai-chat-messages">
+            <div class="ai-message bot">
+                <div class="ai-msg-bubble">
+                    &#128075; Hello! I'm your SS Supermarket Assistant. Ask me anything about our products, ingredients, ratings, prices, or delivery!
+                </div>
+            </div>
+        </div>
+
+        <div class="ai-quick-prompts">
+            <button type="button" class="ai-chip" onclick="sendAiPrompt('What are your top rated products?')">&#11088; Top Rated</button>
+            <button type="button" class="ai-chip" onclick="sendAiPrompt('Show fresh fruits and vegetables')">&#127822; Fresh Produce</button>
+            <button type="button" class="ai-chip" onclick="sendAiPrompt('What dairy products do you have?')">&#129371; Dairy Items</button>
+            <button type="button" class="ai-chip" onclick="sendAiPrompt('What is your delivery policy?')">&#128666; Delivery Info</button>
+        </div>
+
+        <form id="aiChatForm" class="ai-chat-form" onsubmit="handleAiSubmit(event)">
+            <input type="text" id="aiChatInput" placeholder="Ask about products, stock, deals..." autocomplete="off">
+            <button type="submit" aria-label="Send message">&#10148;</button>
+        </form>
+    </div>
+</div>
 
 <div th:fragment="messages" class="container" th:style="${'margin-top:18px'}">
     <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}">Success</div>
