@@ -138,67 +138,7 @@ function togglePasswordVisibility(inputId, btn) {
   }
 }
 
-/* ---------- AI Chatbot Assistant with Chat History ---------- */
-var AI_CHAT_STORAGE_KEY = 'ss_ai_chat_history_v1';
-
-function getAiChatHistory() {
-  try {
-    var stored = localStorage.getItem(AI_CHAT_STORAGE_KEY);
-    return stored ? JSON.parse(stored) : [];
-  } catch (e) {
-    return [];
-  }
-}
-
-function saveAiChatHistory(history) {
-  try {
-    if (history.length > 40) {
-      history = history.slice(history.length - 40);
-    }
-    localStorage.setItem(AI_CHAT_STORAGE_KEY, JSON.stringify(history));
-  } catch (e) {}
-}
-
-function clearAiChatHistory() {
-  try {
-    localStorage.removeItem(AI_CHAT_STORAGE_KEY);
-  } catch (e) {}
-  var container = document.getElementById('aiChatMessages');
-  if (container) {
-    container.innerHTML =
-      '<div class="ai-message bot">' +
-      '<div class="ai-msg-bubble">' +
-      '👋 Hello! I am your SS Supermarket Assistant. Chat history has been cleared! How can I help you today?' +
-      '</div></div>';
-  }
-}
-
-function initAiChat() {
-  var history = getAiChatHistory();
-  var container = document.getElementById('aiChatMessages');
-  if (container && history.length > 0) {
-    container.innerHTML = '';
-    history.forEach(function (item) {
-      appendAiMessageElement(item.role, item.content, item.isHtml);
-    });
-    container.scrollTop = container.scrollHeight;
-  }
-  setupContextualAiChips();
-}
-
-function setupContextualAiChips() {
-  var chipsContainer = document.getElementById('aiQuickPrompts');
-  if (!chipsContainer) return;
-  var urlMatch = window.location.pathname.match(/\/products\/(\d+)/);
-  if (urlMatch) {
-    chipsContainer.innerHTML =
-      '<button type="button" class="ai-chip" onclick="sendAiPrompt(\'How to use this product?\')">&#128214; How to Use</button>' +
-      '<button type="button" class="ai-chip" onclick="sendAiPrompt(\'Explain this product in detail\')">&#128161; Explain Product</button>' +
-      '<button type="button" class="ai-chip" onclick="sendAiPrompt(\'What is the rating and stock for this product?\')">&#11088; Rating &amp; Stock</button>' +
-      '<button type="button" class="ai-chip" onclick="sendAiPrompt(\'Help me navigate the whole webpage\')">&#129517; Site Navigation</button>';
-  }
-}
-
+/* ---------- AI Chatbot Assistant ---------- */
 function toggleAiChat() {
   var win = document.getElementById('aiChatWindow');
   if (!win) return;
@@ -208,8 +148,6 @@ function toggleAiChat() {
     win.setAttribute('aria-hidden', 'false');
     var input = document.getElementById('aiChatInput');
     if (input) input.focus();
-    var container = document.getElementById('aiChatMessages');
-    if (container) container.scrollTop = container.scrollHeight;
   } else {
     win.style.display = 'none';
     win.setAttribute('aria-hidden', 'true');
@@ -231,7 +169,7 @@ function handleAiSubmit(e) {
   var message = input.value.trim();
   if (!message) return;
 
-  renderAiMessage('user', message, false, true);
+  appendAiMessage('user', message, false);
   input.value = '';
 
   var productId = null;
@@ -240,18 +178,12 @@ function handleAiSubmit(e) {
     productId = parseInt(urlMatch[1], 10);
   }
 
-  // Pass recent history for contextual follow-up
-  var fullHistory = getAiChatHistory();
-  var payloadHistory = fullHistory.slice(-8).map(function (m) {
-    return { role: m.role, content: m.rawContent || m.content };
-  });
-
-  var loadingMsg = appendAiMessageElement('bot', 'Thinking...', false);
+  var loadingMsg = appendAiMessage('bot', 'Thinking...', false);
 
   fetch('/api/ai/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ message: message, productId: productId, history: payloadHistory })
+    body: JSON.stringify({ message: message, productId: productId })
   })
     .then(function (res) {
       if (!res.ok) throw new Error('AI service response error');
@@ -260,29 +192,15 @@ function handleAiSubmit(e) {
     .then(function (data) {
       if (loadingMsg) loadingMsg.remove();
       var formatted = formatAiMarkdown(data.reply);
-      renderAiMessage('bot', formatted, true, true, data.reply);
+      appendAiMessage('bot', formatted, true);
     })
     .catch(function () {
       if (loadingMsg) loadingMsg.remove();
-      renderAiMessage('bot', 'Sorry, I had trouble answering that. Please try asking again!', false, false);
+      appendAiMessage('bot', 'Sorry, I had trouble answering that. Please try asking again!', false);
     });
 }
 
-function renderAiMessage(sender, text, isHtml, persist, rawContent) {
-  appendAiMessageElement(sender, text, isHtml);
-  if (persist) {
-    var history = getAiChatHistory();
-    history.push({
-      role: sender,
-      content: text,
-      isHtml: !!isHtml,
-      rawContent: rawContent || text
-    });
-    saveAiChatHistory(history);
-  }
-}
-
-function appendAiMessageElement(sender, text, isHtml) {
+function appendAiMessage(sender, text, isHtml) {
   var container = document.getElementById('aiChatMessages');
   if (!container) return null;
   var msg = document.createElement('div');
@@ -315,7 +233,6 @@ function formatAiMarkdown(text) {
 document.addEventListener("DOMContentLoaded", function () {
   updateThemeIcons();
   initLoginPage();
-  initAiChat();
   var qtyInput = document.getElementById("qtyInput");
   if (qtyInput) {
     qtyInput.addEventListener("change", showQuantityWarning);
