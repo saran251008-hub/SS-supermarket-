@@ -108,7 +108,10 @@
                     <span><span class="ai-status-dot"></span> Online &bull; Instant Guide</span>
                 </div>
             </div>
-            <button type="button" class="ai-chat-close" onclick="toggleAiChat()" aria-label="Close AI Chat">&times;</button>
+            <div class="ai-chat-header-actions">
+                <button type="button" class="ai-chat-clear-btn" onclick="clearAiChatHistory()" aria-label="Clear chat history" title="Clear chat history">&#128465;</button>
+                <button type="button" class="ai-chat-close" onclick="toggleAiChat()" aria-label="Close AI Chat">&times;</button>
+            </div>
         </div>
 
         <div id="aiChatMessages" class="ai-chat-messages">
@@ -119,10 +122,10 @@
             </div>
         </div>
 
-        <div class="ai-quick-prompts">
+        <div id="aiQuickPrompts" class="ai-quick-prompts">
+            <button type="button" class="ai-chip" onclick="sendAiPrompt('Help me navigate the whole webpage')">&#129517; Navigate Website</button>
             <button type="button" class="ai-chip" onclick="sendAiPrompt('What are your top rated products?')">&#11088; Top Rated</button>
             <button type="button" class="ai-chip" onclick="sendAiPrompt('Show fresh fruits and vegetables')">&#127822; Fresh Produce</button>
-            <button type="button" class="ai-chip" onclick="sendAiPrompt('What dairy products do you have?')">&#129371; Dairy Items</button>
             <button type="button" class="ai-chip" onclick="sendAiPrompt('What is your delivery policy?')">&#128666; Delivery Info</button>
         </div>
 
