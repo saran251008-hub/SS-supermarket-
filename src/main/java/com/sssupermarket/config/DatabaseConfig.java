@@ -96,6 +96,20 @@ public class DatabaseConfig {
                 } catch (Exception ignored) {}
             }
 
+            if (host.contains("dpg-") && System.getenv("RENDER") == null && !isPortReachable(host, port, 800)) {
+                log.info("Detected Render internal PostgreSQL host outside of Render cloud. Checking local MySQL at localhost:3306...");
+                if (isPortReachable("localhost", 3306, 600)) {
+                    log.info("Connecting to local MySQL at localhost:3306...");
+                    return new DbParams(
+                            "jdbc:mysql://localhost:3306/sssupermarket?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC",
+                            defaultUser != null && !defaultUser.isBlank() ? defaultUser : "root",
+                            defaultPass != null && !defaultPass.isBlank() ? defaultPass : "root",
+                            "com.mysql.cj.jdbc.Driver"
+                    );
+                }
+                return fallbackH2("Render internal PostgreSQL host is only accessible inside Render cloud network");
+            }
+
             String jdbcUrl = "jdbc:postgresql://" + host + ":" + port + path;
             if (query != null && !query.isBlank()) {
                 jdbcUrl += "?" + query;
